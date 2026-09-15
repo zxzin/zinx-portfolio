@@ -1,0 +1,9 @@
+{
+  "defs": "<radialGradient id=\"bodyGradient\" cx=\"150\" cy=\"140\" r=\"120\" gradientUnits=\"userSpaceOnUse\">\n      <stop offset=\"0%\" stop-color=\"#56CCF2\" />\n      <stop offset=\"100%\" stop-color=\"#2F80ED\" />\n    </radialGradient>",
+  "earLeft": "<circle cx=\"70\" cy=\"70\" r=\"35\" fill=\"url(#bodyGradient)\" />",
+  "earRight": "<circle cx=\"230\" cy=\"70\" r=\"35\" fill=\"url(#bodyGradient)\" />",
+  "body": "<circle cx=\"150\" cy=\"140\" r=\"100\" fill=\"url(#bodyGradient)\" />",
+  "face": "<ellipse cx=\"110\" cy=\"130\" rx=\"30\" ry=\"32\" fill=\"#FFFFFF\" />\n    <ellipse cx=\"190\" cy=\"130\" rx=\"30\" ry=\"32\" fill=\"#FFFFFF\" />\n    <circle cx=\"116\" cy=\"131\" r=\"14\" fill=\"#1A1A1A\" />\n    <circle cx=\"184\" cy=\"131\" r=\"14\" fill=\"#1A1A1A\" />\n    <circle cx=\"150\" cy=\"160\" r=\"4\" fill=\"#A0E6FF\" opacity=\"0.6\" />",
+  "handLeft": "<circle cx=\"50\" cy=\"200\" r=\"25\" fill=\"url(#bodyGradient)\" />",
+  "handRight": "<circle cx=\"250\" cy=\"200\" r=\"25\" fill=\"url(#bodyGradient)\" />"
+}

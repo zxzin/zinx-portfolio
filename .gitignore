@@ -1,0 +1,77 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# generated framework caches
+/.next/
+/.vinext/
+/out/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# hosting and local preview caches
+.vercel
+/.wrangler/
+
+# static build output
+/dist/
+/outputs/
+/work/
+
+# Local planning, historical assets and release evidence
+/.public-release/
+/.zinxlaunch/
+/archive/
+/DESIGN.md
+/PRODUCT.md
+/REFINEMENT_PLAN.md
+/YY_ACTIONS_QA.md
+/YY_DANCE_QA.md
+
+# Publish only reviewed media listed in content-sources/public-assets.json.
+/public/**
+!/public/**/
+!/public/brand/yy-base-v13.svg
+!/public/cases/shushucity-export.png
+!/public/cases/shushucity-home.png
+!/public/cases/shushucity-stage.png
+!/public/evidence/dating-history-real.png
+!/public/evidence/dating-home-real.png
+!/public/evidence/dating-ranking-real.png
+!/public/evidence/yy-journal-real.jpg
+!/public/evidence/yy-school-real.jpg
+!/public/evidence/yy-wardrobe-real.jpg
+!/public/evidence/zinxbee-real.jpg
+!/public/evidence/zinxcord-hud-real.png
+!/public/evidence/zinxcord-workbench-real.png
+!/public/favicon.svg
+!/public/og.png
+!/public/projects/terms.png
+!/public/projects/vibetiming.png
+!/public/projects/zinxpromo.png
+!/public/systems/runpro-cover.png
+!/public/systems/videopro-car-office-contact.png
+!/public/systems/videopro-car-office-loop.mp4
+!/public/systems/videopro-car-office-poster.png

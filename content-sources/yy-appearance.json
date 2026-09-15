@@ -1,0 +1,53 @@
+{
+  "appearanceId": "yy_base_v13",
+  "asset": "/brand/yy-base-v13.svg",
+  "syncedAt": "2026-09-06T12:35:06.798Z",
+  "sources": {
+    "reference": {
+      "file": "design/icon/yy-base-shape-reference.svg",
+      "sha256": "57953f606a01cecca4cbdce7592b7471596436c5f2e7ac737d05a3311c587dfe"
+    },
+    "anatomy": {
+      "file": "src/app/PetWindow/gemini/appearance/base-v13/anatomy.ts",
+      "sha256": "c8c9c2330e60b63f682b126eeed2abd771d92f11353b0f537e0cb7258cb49e58"
+    },
+    "face": {
+      "file": "src/app/PetWindow/gemini/appearance/base-v13/V13BaseFaceRenderer.tsx",
+      "sha256": "aa83407b4d845158de5e86ebcd5c765b3b3836b3323a3a325db076b075a7dc43"
+    },
+    "anchors": {
+      "file": "src/app/PetWindow/gemini/wardrobe/anchors.ts",
+      "sha256": "cd4f357a2202b0c5324daa176c205d6a6bea594f9e95221bd6ddc2d47004e025"
+    },
+    "wardrobeShared": {
+      "file": "src/app/PetWindow/gemini/wardrobe/daily-outing/components/shared.tsx",
+      "sha256": "03c87069a04e2e478d31078ec8f7c9fef86bd3cee90420e4bae8761a1e16eda9"
+    },
+    "scarf": {
+      "file": "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyRedScarf.tsx",
+      "sha256": "5db6e08bdeeb1279e45d405373766eb74d1af11c83fc22a457274926187d00af"
+    },
+    "hat": {
+      "file": "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyYellowHat.tsx",
+      "sha256": "be91ae3627605a34c542c7e0a67c92bd7fffc62470f1f35349347d19819d0503"
+    },
+    "sticker": {
+      "file": "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyStarSticker.tsx",
+      "sha256": "27bf0a6690485274952b87fe658fc344e3126861f5914267dc68fe51d8e2acfc"
+    },
+    "motion": {
+      "file": "src/app/PetWindow/gemini/components/PetSvg.tsx",
+      "sha256": "def032ff21346fab8a0b28c19905f09a50bf69fa23ffbbefb3d4494f65907da2"
+    }
+  },
+  "outputs": {
+    "public/brand/yy-base-v13.svg": "57953f606a01cecca4cbdce7592b7471596436c5f2e7ac737d05a3311c587dfe",
+    "src/vendor/yy/base-parts.json": "c11d9d7f556b39a4478c529620339eed485ce51689b9f595d607291a08cf0284",
+    "src/vendor/yy/dance.css": "3799864a755dfc3b2373aa6ae007de4caf534be316caeb566b7714ebcc952c72",
+    "src/vendor/yy/wardrobe/anchors.ts": "cd4f357a2202b0c5324daa176c205d6a6bea594f9e95221bd6ddc2d47004e025",
+    "src/vendor/yy/wardrobe/daily-outing/components/shared.tsx": "03c87069a04e2e478d31078ec8f7c9fef86bd3cee90420e4bae8761a1e16eda9",
+    "src/vendor/yy/wardrobe/daily-outing/components/DailyRedScarf.tsx": "5db6e08bdeeb1279e45d405373766eb74d1af11c83fc22a457274926187d00af",
+    "src/vendor/yy/wardrobe/daily-outing/components/DailyYellowHat.tsx": "be91ae3627605a34c542c7e0a67c92bd7fffc62470f1f35349347d19819d0503",
+    "src/vendor/yy/wardrobe/daily-outing/components/DailyStarSticker.tsx": "27bf0a6690485274952b87fe658fc344e3126861f5914267dc68fe51d8e2acfc"
+  }
+}

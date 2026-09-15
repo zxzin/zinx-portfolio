@@ -1,0 +1,122 @@
+{
+  "appearance": "yy_base_v13",
+  "syncedAt": "2026-09-06T12:35:07.376Z",
+  "actions": [
+    {
+      "id": "stinky",
+      "label": "臭臭舞",
+      "state": "MUSIC_MEME_TRUE_LOVE",
+      "wardrobeItems": [
+        {
+          "id": "yy_wardrobe_daily_yellow_hat",
+          "anchors": [
+            "hat"
+          ]
+        },
+        {
+          "id": "yy_wardrobe_daily_red_scarf",
+          "anchors": [
+            "body"
+          ]
+        },
+        {
+          "id": "yy_wardrobe_daily_star_sticker",
+          "anchors": [
+            "face_accessory"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "juggle",
+      "label": "手抛球",
+      "state": "V13_HAND_BALL_JUGGLE",
+      "wardrobeItems": [
+        {
+          "id": "yy_wardrobe_daily_sleep_hat",
+          "anchors": [
+            "hat"
+          ]
+        }
+      ],
+      "wardrobeItemVariants": {
+        "yy_wardrobe_daily_sleep_hat": "yellow"
+      }
+    },
+    {
+      "id": "orbit",
+      "label": "旋转手",
+      "state": "V13_HAND_BALL_SHIELD",
+      "wardrobeItems": []
+    },
+    {
+      "id": "barrage",
+      "label": "冲击波",
+      "state": "V13_HAND_ENERGY_BARRAGE",
+      "wardrobeItems": [
+        {
+          "id": "yy_wardrobe_daily_red_scarf",
+          "anchors": [
+            "body"
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "src/app/PetWindow/gemini/appearance/base-v13/anatomy.ts": "c8c9c2330e60b63f682b126eeed2abd771d92f11353b0f537e0cb7258cb49e58",
+    "src/app/PetWindow/gemini/appearance/base-v13/V13BaseFaceRenderer.tsx": "aa83407b4d845158de5e86ebcd5c765b3b3836b3323a3a325db076b075a7dc43",
+    "src/app/PetWindow/gemini/appearance/index.ts": "e31e3d7215170082813817a7b713dc2c934326efec565a7befdf65d0e4e3c2f4",
+    "src/app/PetWindow/gemini/appearance/registry.ts": "b133f5853dd3c20a3096fd1b5cdcb618c63a8a55e3e3f98e671e5adb245e3bee",
+    "src/app/PetWindow/gemini/components/PetProps/ColaProp.tsx": "ca1a44ebdf42b5e52850a7f1415f76191dd7ae00c8defda9babf91ae8d267dea",
+    "src/app/PetWindow/gemini/components/PetProps/CookieProp.tsx": "e8ee36045d1aa6493b1b2d00b4607ae04039ad6d22f8bddc31b061acd01113c7",
+    "src/app/PetWindow/gemini/components/PetProps/CowboyProp.tsx": "a3f59cb0c7a87b0e982a399d9c011bd46bf2bded3f9376b1c1c1f30c3938f0c0",
+    "src/app/PetWindow/gemini/components/PetProps/FlowerProp.tsx": "7fdfcdc180d4858c3a04fb87c9c5fd58840c3754faa99c802abba58be2de904e",
+    "src/app/PetWindow/gemini/components/PetProps/GamepadProp.tsx": "dcf0086fc9fd82c7dbb78150c7823c9b9d69ea2741ccd1e3aa8026937a153f9c",
+    "src/app/PetWindow/gemini/components/PetProps/MilkBoxProp.tsx": "e4636699d7bc4ab670f1b64365b820e0d972b12353241b522f4b1f994766b2c4",
+    "src/app/PetWindow/gemini/components/PetProps/StarProp.tsx": "e6c3a61b2970c19dc927485cbb3fb0f07f15ba2a062efe523895f74cc97ded5a",
+    "src/app/PetWindow/gemini/components/PetProps/StoneProp.tsx": "dfbe38e6a9ca501bcacd06ff8896be411dc4c8d12dab426f4e1ef77090ab8a36",
+    "src/app/PetWindow/gemini/components/PetProps/TreatProp.tsx": "bc2715421bd07a80b2a301ce4fdc5a105433c5117cc08d0ad7791f4ec458a2c7",
+    "src/app/PetWindow/gemini/components/PetSvg.tsx": "def032ff21346fab8a0b28c19905f09a50bf69fa23ffbbefb3d4494f65907da2",
+    "src/app/PetWindow/gemini/data/petConfig.ts": "4ebf489e6d28a86b608c88bcc3e2eacc47c698652e54323dc3318e93353a480d",
+    "src/app/PetWindow/gemini/data/themeConfig.ts": "6f332f94d0f7b62c4a33c6b8932aae4663dd2d3eac3d3a687a3fa34d2557eb46",
+    "src/app/PetWindow/gemini/fund/thanks/animations.css": "96cf2bc84900de7e69edfe24b4ada0620b7e33c51dbd82ab87053ccab53ace39",
+    "src/app/PetWindow/gemini/motion/presetManifest.json": "193779b94a2c3ed6b31250c196bd93c645280eb178950e22502daf6cac9db033",
+    "src/app/PetWindow/gemini/school/course-01-short-leg/animations.css": "8ac4a1a04745a413a9263973c6ccf658c31d4154c972ffc81f08962eb585363f",
+    "src/app/PetWindow/gemini/school/course-02-magic-dance/animations.css": "7e16e1c2ac732262c075d4e54df1c36efafd30b401892adbeebdfce69d3bb88d",
+    "src/app/PetWindow/gemini/school/course-03-emotion/animations.css": "914f85246305497a5d85305c09ddab403df44312d82791befb4f275718b8118c",
+    "src/app/PetWindow/gemini/school/course-04-stage-trainee/animations.css": "201513ccd6452a43b3262b69f7409b08a861ebd2593fa817597607149093601f",
+    "src/app/PetWindow/gemini/skins/activeSkin.ts": "e130736de1d89c0c83033edc811798b1b2b725aa7ae0e84a0eee6f8d4579db7b",
+    "src/app/PetWindow/gemini/skins/v13-softline-doodle/index.ts": "984650a1afdaf921b36911c078e9014b7c33c41ba2cd41c1f98d18cbb131bf14",
+    "src/app/PetWindow/gemini/skins/v13-softline-doodle/V13SoftlineDoodleSkinRenderer.tsx": "6d22928b975ba313554f9f79aaa59a16ef9405f03cf2a9f0904525b06c66d034",
+    "src/app/PetWindow/gemini/skins/v2-handdrawn-doodle/index.ts": "cdbc55f24a27963355a948f4076a5225e2e8a64209b545ab0e5ed7cf00f95daa",
+    "src/app/PetWindow/gemini/skins/v2-handdrawn-doodle/V2HanddrawnDoodleSkinRenderer.tsx": "a2b34f832f079c2a16a0926895c8f34ce2d3f60c75b01aadce0fdd148e0cd7a9",
+    "src/app/PetWindow/gemini/types.ts": "7d9cb3728e110ce52057b33342388d5f184a341052dba14f3177c5f0323f0ca8",
+    "src/app/PetWindow/gemini/v13/animations.css": "1be41cb712ce346e95034269c2dec24909540959a317995936d0a53066eb1f83",
+    "src/app/PetWindow/gemini/v13/manifest.json": "bd5054eb9e8f3efdee13c86a6834c8e1db022f84e06440f17d87ad9efc6fdfaa",
+    "src/app/PetWindow/gemini/v14/review/salute-tie/animations.css": "7969d4139a558b0e2fe3e7aee4767c2def418c1d6058e092aee7bb6c5a92eb95",
+    "src/app/PetWindow/gemini/v14/review/salute-tie/V14SaluteTieReviewMotion.tsx": "e6b17508037a7f00bffbeeb54e8fde79c16adf154907198bf1ad4d556098f4eb",
+    "src/app/PetWindow/gemini/v14/wardrobe/formal-long-tie/formalLongTie.css": "9082513c35f425f0ff5aee3b03360c3ef375839cae1ec29a08da1e70df0328e8",
+    "src/app/PetWindow/gemini/v14/wardrobe/formal-long-tie/V14FormalLongTie.tsx": "a5eb8effe6a386670ab6bf426d5a84ad25448610647a59db798329e5fa9eee79",
+    "src/app/PetWindow/gemini/wardrobe/anchors.ts": "cd4f357a2202b0c5324daa176c205d6a6bea594f9e95221bd6ddc2d47004e025",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyGreenBallGloves.tsx": "1893bdc1b6c790a20c80befb13c2726c3f4113e44584851d5cad43116e41b1d6",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyHeartSticker.tsx": "980eda9a3cba366bc6cb25563cf95812975eeefa633298b5eac5f2ad7d25eb8c",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyKnitHat.tsx": "1338fd664b2d352e9b52802b61ffa78c2229a67ba8e13e7d6793459a5588a739",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyLightningClip.tsx": "2695dbad5be8345a5c25c7d4c661af885151bd3941f46fce6306c0dce88bddcf",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyRedBowTie.tsx": "6254b4479d624b216160ed8c39756977dc950d07befe8d912e6695518e9dcd21",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyRedScarf.tsx": "5db6e08bdeeb1279e45d405373766eb74d1af11c83fc22a457274926187d00af",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyRoundGlasses.tsx": "2eac8f3337a49cf212f4bfeb541bed6f021cfdc120983f02bad00082539cb67a",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailySleepHat.tsx": "6f2e96d1e0bb2c5e5ea4dd4bc1364253f5a8519d2a58853e923e407fbee29173",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailySleepySetPreview.tsx": "1cafc73898307713642a76b449d23f5b151a263f41cc023dd541eecd122854db",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyStarSticker.tsx": "27bf0a6690485274952b87fe658fc344e3126861f5914267dc68fe51d8e2acfc",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/DailyYellowHat.tsx": "be91ae3627605a34c542c7e0a67c92bd7fffc62470f1f35349347d19819d0503",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/index.ts": "bc3fd583fc34f68269e08d83050e11d584ee19d9200e7b05a4f72c4bf4ee44e6",
+    "src/app/PetWindow/gemini/wardrobe/daily-outing/components/shared.tsx": "03c87069a04e2e478d31078ec8f7c9fef86bd3cee90420e4bae8761a1e16eda9",
+    "src/app/PetWindow/gemini/wardrobe/raster-tuned/components/RasterTunedWardrobeItem.tsx": "6b169f2a9261f0d88a45dfb1f95522a324a8ff1602fffde07da8745b1dd3c8b1",
+    "src/app/PetWindow/gemini/wardrobe/WardrobeSlot.tsx": "300b02c67a39f518d3a0faef3226f3c895719ce9e7ae1b12151156dcb31430fc",
+    "tailwind.config.cjs": "b3d9f9cf04d4e8e9c88ceb2581bc38f755c9dcfd26ecde2e704347422d77faed"
+  },
+  "outputs": {
+    "src/vendor/yy/actions.json": "51f36779992c74de134c992b0ddcd22198f4cfea62908aae5f1b29951fe64baf"
+  }
+}

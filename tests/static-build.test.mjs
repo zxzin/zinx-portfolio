@@ -249,16 +249,16 @@ test("YY case tabs each use their real current-source expression and retain nati
 
 test("YY case playback has per-action lifecycle and a dressed reduced-motion still", async () => {
   const component = await read("src/components/YYActionStage.tsx");
-  const page = await read("src/CreativeWorkshop.tsx");
+  const page = await read("src/components/ExhibitDialog.tsx");
   const css = await read("src/components/YYActionStage.css");
   assert.match(component, /IntersectionObserver/);
   assert.match(component, /visibilitychange/);
   assert.match(component, /inView && visible && !paused && !reduced/);
   assert.match(component, /reduced \? current.stillSvg : current.svg/);
   assert.match(component, /setReplay\(value => value \+ 1\)/);
-  assert.match(page, /YYActionStage\s+key=\{current.yyAction\}/);
-  assert.match(page, /id="motion-panel"/);
-  assert.match(page, /label="YY 的四个动作"/);
+  assert.match(page, /media.kind === "yy".*<YYActionStage action=\{media.action\}/);
+  assert.match(page, /key=\{current.id\}.*<ExhibitPlayer media=\{current\}/);
+  assert.match(page, /aria-label="作品画面"/);
   assert.match(css, /animation-play-state: paused !important/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
@@ -286,8 +286,8 @@ test("layout and motion contracts guard the reproduced regressions", async () =>
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /backdrop-filter:\s*blur/);
   assert.match(
-    await read("src/CreativeWorkshop.tsx"),
-    /galleryProjects\[index\]\.slug/,
+    await read("src/components/ExhibitionWall.tsx"),
+    /visibleExhibits\[index \+ direction\]/,
   );
   assert.match(component, /element\.showModal\(\)/);
   assert.match(component, /event\.key === "Tab"/);

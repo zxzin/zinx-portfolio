@@ -46,14 +46,19 @@ yarn-error.log*
 /archive/
 /DESIGN.md
 /PRODUCT.md
+/EXHIBITION_PLAN.md
 /REFINEMENT_PLAN.md
 /YY_ACTIONS_QA.md
 /YY_DANCE_QA.md
+/QA_CARD_TABLE_2026-09-22.md
 
 # Publish only reviewed media listed in content-sources/public-assets.json.
 /public/**
 !/public/**/
 !/public/brand/yy-base-v13.svg
+!/public/brand/dating-icon.png
+!/public/brand/shushu-icon.png
+!/public/brand/monkex-icon.png
 !/public/cases/shushucity-export.png
 !/public/cases/shushucity-home.png
 !/public/cases/shushucity-stage.png
@@ -68,6 +73,8 @@ yarn-error.log*
 !/public/evidence/zinxcord-workbench-real.png
 !/public/favicon.svg
 !/public/og.png
+!/public/projects/monkex/showcase.png
+!/public/projects/monkex/guide.html
 !/public/projects/terms.png
 !/public/projects/vibetiming.png
 !/public/projects/zinxpromo.png

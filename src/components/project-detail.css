@@ -1,0 +1,40 @@
+.dialog-copy .dialog-summary {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 16px 0;
+}
+.detail-process {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid #cad6e7;
+  margin-top: 22px;
+}
+.detail-process > div {
+  border-left: 2px solid var(--blue);
+  padding-left: 10px;
+}
+.detail-process b {
+  font: 700 9px var(--mono);
+  color: #577096;
+}
+.detail-process p {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.detail-facts {
+  display: grid;
+  gap: 15px;
+  margin: 20px 0;
+}
+.detail-facts dt {
+  font-size: 10px;
+  color: #8291a5;
+  margin-bottom: 4px;
+}
+.detail-facts dd {
+  font-size: 13px;
+  line-height: 1.8;
+}

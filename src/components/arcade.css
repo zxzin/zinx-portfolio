@@ -1,0 +1,71 @@
+.arcade-body { margin: 0; overflow: hidden; background: #160a13; }
+.arcade-experience { position: relative; width: 100%; height: 100svh; min-height: 520px; overflow: hidden; color: #f5f8ff; font-family: var(--sans); isolation: isolate; --blackout: 0; }
+.arcade-world, .arcade-shade, .arcade-blackout { position: absolute; inset: 0; }
+.arcade-world { touch-action: pan-y; }
+.arcade-world canvas { display: block; touch-action: pan-y; }
+.arcade-shade { pointer-events: none; background: linear-gradient(180deg, #12080f65 0, transparent 22%, transparent 74%, #12080faa); z-index: 2; }
+.arcade-blackout { z-index: 30; pointer-events: none; background: #08101b; opacity: var(--blackout); }
+.stage-curtains { position: absolute; inset: 0; z-index: 14; overflow: hidden; pointer-events: auto; }
+.arcade-experience[data-ready=false] .stage-curtains { background: #400919; }
+.arcade-experience[data-phase=revealing] .exhibition-companion, .arcade-experience[data-phase=revealing] .arcade-footer { visibility: hidden; }
+.arcade-experience[data-phase=revealing] .lever-guide { visibility: hidden; }
+.arcade-experience[data-phase=revealing] .arcade-loading { background: transparent; text-shadow: 0 2px 5px #180006; }
+.arcade-header { position: absolute; z-index: 15; top: 0; inset-inline: 0; padding: 26px 32px; display: flex; align-items: center; justify-content: space-between; gap: 18px; pointer-events: none; }
+.arcade-header a, .arcade-header button { pointer-events: auto; }
+.arcade-identity { display: flex; align-items: center; gap: 13px; text-decoration: none; color: #fff; }
+.arcade-identity b { font-size: 30px; letter-spacing: -.04em; font-weight: 950; }
+.arcade-identity .signature-pixels { width: 16px; height: 16px; gap: 3px; }
+.arcade-header nav { position: relative; display: flex; align-items: stretch; gap: 5px; padding: 6px 13px; border: 1px solid #bba284; border-radius: 18px; background: linear-gradient(120deg,#9f8970,#dbcdad 24%,#786457 65%,#aca28c); box-shadow: inset 0 1px #fff4d6b3, inset 0 -3px #49372d, 0 3px 0 #140e10, 0 9px 16px #0006; isolation: isolate; }
+.scene-control-rail::before { content: ""; position: absolute; z-index: -1; top: -28px; left: 20px; right: 20px; height: 28px; border-inline: 4px ridge #b99c79; pointer-events: none; }
+.scene-control-rail::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(circle at 6px 50%,#221818 0 1px,#e1cdb0 1.5px 2.5px,transparent 3px),radial-gradient(circle at calc(100% - 6px) 50%,#221818 0 1px,#e1cdb0 1.5px 2.5px,transparent 3px); }
+.arcade-header nav a, .arcade-header nav button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; color: #f2dfc5; background: linear-gradient(160deg,#4e3940,#281b23 75%); border: 1px solid #a4896b80; border-radius: 12px; padding: 8px 12px; font: 700 12px var(--sans); box-shadow: inset 0 1px #ffe4bc60, inset 0 -3px #140b13, 0 1px 2px #14090e; text-shadow: 0 1px #10080b; text-decoration: none; white-space: nowrap; transition: background .16s, box-shadow .16s; }
+.arcade-header nav a:hover, .arcade-header nav button:hover:enabled { background: linear-gradient(160deg,#6a4a47,#37212c); color: #fff3dc; border-color: #efd2a4; }
+.arcade-header nav button:active:enabled, .arcade-header nav a:active { background: #261922; box-shadow: inset 0 3px 8px #080509, inset 0 -1px #efd0a44d; }
+.rail-icon { width: 18px; height: 18px; fill: none; stroke: #e6c79b; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rail-switch small { font: 700 10px var(--sans); color: #cbb7ac; margin-left: 3px; }
+.rail-indicator { position: relative; width: 25px; height: 13px; flex: 0 0 auto; border: 1px solid #aa8e6d; border-radius: 8px; background: #160f15; box-shadow: inset 0 2px 3px #0009, 0 1px #ffe6bb33; }
+.rail-indicator::after { content: ""; position: absolute; top: 2px; left: 2px; width: 7px; height: 7px; border-radius: 3px; background: linear-gradient(#cdb99d,#7b6654); box-shadow: 0 1px 2px #0009; transition: transform .18s; }
+.scene-control-rail [aria-pressed=true] .rail-indicator { background: #735315; }
+.scene-control-rail [aria-pressed=true] .rail-indicator::after { transform: translateX(12px); background: #ffe17b; box-shadow: 0 0 5px #ffcf6570, inset 0 1px #fff6c6; }
+.scene-control-rail [aria-pressed=true] small { color: #ffe17b; }
+.rail-seal { display: grid; place-items: center; width: 23px; height: 23px; border: 1px solid #d1ac77; border-radius: 50%; background: linear-gradient(135deg,#f2d09c,#ac7b41); color: #3e2425; font: 900 14px var(--mono); box-shadow: inset 0 1px #ffebc8, 0 2px 2px #140a12; text-shadow: 0 1px #ffe6b8; }
+.rail-arrow { color: #cba87a; font-size: 14px; }
+.arcade-header nav .opening-link { color: #ffe2a0; font-weight: 850; }
+.arcade-experience button { cursor: pointer; }
+.arcade-experience button:disabled { cursor: default; }
+.arcade-header button:disabled, .arcade-footer button:disabled { opacity: .5; }
+.arcade-experience button:focus-visible, .arcade-experience a:focus-visible { outline: 3px solid #ffd33d; outline-offset: 5px; }
+.lever-hit { display: block; width: 62px; height: 62px; border-radius: 50%; background: transparent; border: 0; touch-action: none; cursor: grab !important; transform: translateZ(0); }
+.lever-hit:active { cursor: grabbing !important; }
+.lever-hit:focus-visible, .lever-hit:hover { box-shadow: 0 0 0 1px #fff7; }
+.lever-guide { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 6px 9px; border-radius: 8px; background: #28121ce8; color: #ffe3ad; box-shadow: 0 1px #f0c27a44; font: 800 13px var(--sans); }
+.lever-guide > span { color: #ffd33d; font-size: 19px; }
+.lever-guide[data-busy=true] { opacity: .65; }
+.arcade-loading { position: absolute; z-index: 17; inset: 0; display: flex; align-items: center; justify-content: center; gap: 18px; background: #21364c; color: #edf6ff; font-size: 15px; }
+.arcade-loading button { border: 1px solid #c6d6e466; color: #edf6ff; border-radius: var(--zx-radius-control); background: transparent; padding: 10px 16px; font: inherit; }
+.arcade-experience kbd { font: 10px var(--mono); display: inline-block; margin: 0 2px; padding: 2px 4px; border: 1px solid #bed2e23d; border-radius: 4px; }
+.arcade-footer { position: absolute; z-index: 15; bottom: 0; inset-inline: 0; height: 53px; padding: 0 32px; display: flex; align-items: center; gap: 25px; color: #c0cfdd; pointer-events: none; }
+.arcade-footer > span { display: inline-flex; align-items: center; gap: 8px; font: 9px var(--mono); letter-spacing: .14em; }
+.arcade-footer i { width: 5px; height: 5px; background: #26ca80; }
+.arcade-footer button, .arcade-footer a { min-height: 44px; display: inline-flex; align-items: center; pointer-events: auto; padding: 8px 0; border: 0; background: none; color: #cfdfef; font: 650 11px var(--sans); text-decoration: none; }
+.arcade-footer a:last-child { margin-left: auto; }
+@media (max-width: 700px) {
+  .arcade-header { padding: 16px 12px; align-items: center; gap: 8px; }
+  .arcade-identity { gap: 8px; }
+  .arcade-identity b { font-size: 27px; }
+  .arcade-header nav { gap: 3px; padding: 4px 7px; border-radius: 12px; }
+  .arcade-header nav a, .arcade-header nav button { padding: 5px; font-size: 10px; gap: 3px; border-radius: 8px; }
+  .arcade-header nav .rail-switch { flex-direction: column; gap: 4px; }
+  .rail-icon, .rail-seal { display: none; }.rail-switch small { font-size: 9px; margin-left: 1px; }
+  .scene-control-rail::before { top: -17px; height: 17px; left: 15px; right: 15px; border-inline-width: 3px; }
+  .scene-control-rail::after { background: radial-gradient(circle at 4px 50%,#221818 0 1px,#e1cdb0 1.5px 2px,transparent 2.5px),radial-gradient(circle at calc(100% - 4px) 50%,#221818 0 1px,#e1cdb0 1.5px 2px,transparent 2.5px); }
+  .rail-arrow { display: none; }
+  .arcade-header nav .opening-link > span { display: none; }
+  .arcade-footer { padding: 0 20px; gap: 17px; height: 58px; }
+  .arcade-footer > span { font-size: 8px; letter-spacing: .06em; }
+  .arcade-footer button, .arcade-footer a { font-size: 10px; }
+  .lever-hit { width: 48px; height: 48px; }
+  .lever-guide { font-size: 11px; gap: 4px; padding: 4px 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .arcade-header nav a, .arcade-header nav button, .rail-indicator::after { transition: none; } }
+html[data-motion=reduced] .rail-indicator::after { transition: none; }

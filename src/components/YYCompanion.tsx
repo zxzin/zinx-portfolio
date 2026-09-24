@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { yyAppearance } from "../content/portfolio";
 import { useReducedMotion } from "../lib/motion";
-import { reassemble } from "./PixelMatter";
 import parts from "../vendor/yy/base-parts.json";
 import { DailyYellowHat } from "../vendor/yy/wardrobe/daily-outing/components/DailyYellowHat";
 import { DailyRedScarf } from "../vendor/yy/wardrobe/daily-outing/components/DailyRedScarf";
@@ -9,19 +8,19 @@ import { DailyStarSticker } from "../vendor/yy/wardrobe/daily-outing/components/
 import "../vendor/yy/dance.css";
 import "./YYCompanion.css";
 
-export function YYCompanion() {
+export type YYOutfit = "daily" | "scarf" | "hat";
+export function YYCompanion({ outfit = "daily", onInteract }: { outfit?: YYOutfit; onInteract?: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<SVGGElement>(null);
   const timer = useRef(0);
   const [inView, setInView] = useState(false);
   const [pageVisible, setPageVisible] = useState(() => typeof document === "undefined" || document.visibilityState === "visible");
-  const [paused, setPaused] = useState(false);
   const [encore, setEncore] = useState(false);
   const [greeting, setGreeting] = useState(false);
   const reduced = useReducedMotion();
   const gradient = `yy-body-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const svgPart = (source: string) => ({ __html: source.replaceAll("bodyGradient", gradient) });
-  const running = inView && pageVisible && !paused && !reduced;
+  const running = inView && pageVisible && !reduced;
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));
@@ -36,12 +35,11 @@ export function YYCompanion() {
   }, []);
 
   function interact() {
+    onInteract?.();
     clearTimeout(timer.current);
     setGreeting(true);
     if (!reduced) {
-      setPaused(false);
       setEncore(true);
-      reassemble(root.current);
     }
     timer.current = window.setTimeout(() => setGreeting(false), 1400);
   }
@@ -55,9 +53,10 @@ export function YYCompanion() {
       data-reduced={reduced}
       data-dance={encore ? "encore" : "loop"}
       data-feedback={greeting}
+      data-outfit={outfit}
     >
       <button type="button" className="yy-dance-trigger" aria-label="和 YY 一起跳舞" onClick={interact}>
-        <svg viewBox="-25 -40 350 335" role="img" aria-label="戴小黄帽、红围巾和星星脸贴的 YY" className="yy-dancer">
+        <svg viewBox="-25 -40 350 335" role="img" aria-label={outfit === "daily" ? "戴小黄帽、红围巾和星星脸贴的 YY" : outfit === "scarf" ? "戴红围巾的 YY" : "戴小黄帽和星星脸贴的 YY"} className="yy-dancer">
           <defs dangerouslySetInnerHTML={svgPart(parts.defs)} />
           <g
             className="yy-motion yy-dancer-body"
@@ -70,26 +69,14 @@ export function YYCompanion() {
             <g className="yy-motion yy-dancer-ear-right" dangerouslySetInnerHTML={svgPart(parts.earRight)} />
             <g dangerouslySetInnerHTML={svgPart(parts.body)} />
             <g dangerouslySetInnerHTML={svgPart(parts.face)} />
-            <DailyYellowHat pose="dance" />
-            <DailyStarSticker pose="dance" />
-            <DailyRedScarf pose="dance" />
+            {outfit !== "scarf" && <DailyYellowHat pose="dance" />}
+            {outfit !== "scarf" && <DailyStarSticker pose="dance" />}
+            {outfit !== "hat" && <DailyRedScarf pose="dance" />}
           </g>
           <g className="yy-motion yy-dancer-hand-left" dangerouslySetInnerHTML={svgPart(parts.handLeft)} />
           <g className="yy-motion yy-dancer-hand-right" dangerouslySetInnerHTML={svgPart(parts.handRight)} />
         </svg>
         <span className="yy-dance-hint" aria-live="polite">{greeting ? (reduced ? "收到啦！" : "再来一段！") : "点我，来一段"}</span>
-      </button>
-      <button
-        type="button"
-        className="yy-dance-pause"
-        aria-label={reduced ? "YY 动效已减少" : paused ? "继续 YY 跳舞" : "暂停 YY 跳舞"}
-        aria-pressed={paused || reduced}
-        disabled={reduced}
-        onClick={() => setPaused(!paused)}
-      >
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-          {paused || reduced ? <path d="M5 3 13 8 5 13Z" fill="currentColor" /> : <path d="M4 3H7V13H4ZM10 3H13V13H10Z" fill="currentColor" />}
-        </svg>
       </button>
     </div>
   );

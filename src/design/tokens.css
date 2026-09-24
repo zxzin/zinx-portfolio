@@ -1,0 +1,39 @@
+/* Zinx Exhibit Kit 0.4 — casino table, rounded glass cards and bevelled edges. */
+.arcade-experience, .exhibit-dialog {
+  --zx-stage: #f7faff;
+  --zx-panel: #ffffff;
+  --zx-chrome: #ffffffb8;
+  --zx-ink: #171512;
+  --zx-muted: #526078;
+  --zx-line: #c4d0e0;
+  --zx-light: #f6f8fc;
+  --zx-night-muted: #b5c6da;
+  --zx-red: #e7372f;
+  --zx-yellow: #ffd33d;
+  --zx-blue: #2477ff;
+  --zx-green: #16b35c;
+  --zx-salon: #160a13;
+  --zx-felt: #2b1521fc;
+  --zx-champagne: #f6d8b1;
+  --zx-card-ink: #241720;
+  --zx-radius-shell: 24px;
+  --zx-radius-panel: 18px;
+  --zx-radius-control: 14px;
+  --zx-border: 1px solid var(--zx-line);
+  --zx-glass-rim: inset 0 2px 1px #fff, inset 2px 0 1px #fffffff2, inset -1px -3px 2px #61759128;
+  --zx-contact-shadow: 0 2px 2px #42577118, 0 6px 8px #4257710f;
+  --zx-space-1: 4px;
+  --zx-space-2: 8px;
+  --zx-space-3: 12px;
+  --zx-space-4: 16px;
+  --zx-space-6: 24px;
+  --zx-space-8: 32px;
+  --zx-ease-out: cubic-bezier(.22, 1, .36, 1);
+  --zx-duration-fast: 160ms;
+  --zx-duration-panel: 280ms;
+}
+.zx-panel-bar { min-height: 64px; display: flex; align-items: center; gap: 12px; padding: 16px 22px; background: var(--zx-chrome); color: var(--zx-ink); font: 750 13px/1.5 var(--sans); }
+.zx-panel-code { display: grid; place-items: center; min-width: 30px; height: 30px; border-radius: 9px; background: var(--exhibit-tint, #eaf1ff); box-shadow: inset 0 1px #fff, inset 0 -1px #657c9826; font: 11px/1 var(--mono); color: var(--zx-muted); flex-shrink: 0; }
+.zx-panel-title { min-width: 0; }
+.zx-panel-title h3 { margin: 0; font: 850 clamp(17px, 1.8vw, 23px)/1.2 var(--sans); letter-spacing: -.025em; text-wrap: balance; }
+.zx-panel-end { display: flex; align-items: center; gap: 14px; margin-left: auto; font: 650 11px/1.4 var(--sans); color: var(--zx-muted); flex-shrink: 0; }

@@ -1,8 +1,16 @@
 # Zinx Portfolio
 
-Zinx 的个人作品网站。React + TypeScript 管理内容和交互，GSAP / ScrollTrigger 驱动案例叙事，Canvas 实现短暂的像素分散与重组。Vite 输出静态文件，可使用 GitHub Pages。
+Zinx 的个人作品网站。React + TypeScript 管理作品和展览编排，R3F / Three.js 构建可操作的机器入口，GSAP 驱动开场与作品展开。Vite 输出静态文件，可使用 GitHub Pages。
 
-视觉遵循冷白液态玻璃、现代粗黑体和四原色像素语言。代表作品为 YY、Dating 日记、数数城；后续展示软件与实验、项目存档、VideoPro / RunPro 和作者介绍。
+当前版本为可扩展金币展台：红幕揭幕 → 三次操作各转一轮 → 机器冒烟爆开 → 金币落桌 → 翻面预览 → 真实详情。底部可一键翻开/收回，作品按数据配置。
+入口支持拉杆、点击、Enter/Space；展墙使用滚动、触摸和章节定位，点击作品展开，Esc 关闭，详情支持上一件/下一件。声音默认开启，首次用户手势解锁，静音偏好保存在本机。首页 `/` 或 `#top` 每次都显示老虎机，`#hub` 直达展墙；旧 `?view=library` 统一显示当前策展结果，静态浏览位于 `?render=static`。
+
+当前展出 5 件：YY、Dating 日记、Monkex、录屏小子、VideoPro。数数城等候选保留在清单，默认不展出。
+
+- [新增作品指南](ADDING_WORKS.md)：直接接入新作品金币、配置预览、组合详情与媒体检查。
+- [作品与素材清单](WORKS_INVENTORY.md)：26 个目录条目的位置、展示用途、候选状态与新增模板。
+- [统一设计规范](DESIGN_SYSTEM.md)：圆角与倒角、像素玻璃、共享 token、行为与动效验收。
+- [公开资源与许可调查](RESOURCE_REFERENCES.md)：已采用、候选、未采用及未来模板销售的复核范围。
 
 ## 本地运行
 
@@ -26,32 +34,43 @@ npm run preview
 ## 新增作品
 
 1. 复核素材公开权限，把图片放入 `public/projects/<slug>/`，加入 `content-sources/public-assets.json`，并在 `.gitignore` 添加对应的 `!/public/...` 白名单项。
-2. 在 `src/content/portfolio.ts` 的 `portfolioProjects` 中增加项目，填写名称、简短用途、真实状态、类型和现有链接。
-3. 设置 `media` 提供主图；可选的 `gallery` 提供多张真实功能截图及各自说明。设置 `selected: true` 进入软件与实验区。
-4. 普通项目自动进入目录；带图项目自动进入详情浏览集合。
-5. 三条代表作品使用 `featureCases` 的阶段结构。每个阶段提供功能标签、标题、说明和截图；详情复用同一组阶段素材。
+2. 新作品可直接在 `src/content/extra-exhibits.ts` 添加标准记录（见 ADDING_WORKS.md）；现有产品继续维护 `src/content/portfolio.ts`，避免重复记录。
+3. 设置 `media` 提供主图；可选的 `gallery` 提供多张真实功能截图及各自说明。新条目保持候选，不自动展出；无媒体条目保持隐藏。
+4. 在 `src/content/exhibition.ts` 的 `exhibitionPlacements` 显式设置 `visible: true`，以及分组、顺序、主展权重与媒体顺序。数量、导航与顺序浏览自动更新；移除作品时同步移除其编排条目。
+5. `ExhibitMedia` 支持 image、video、animation、yy 和 demo。视频及动图提供 poster，SVG 动作引用现行 YY action ID，本地 demo 采用受限 iframe，外部体验通过链接打开。动态表情包的渲染入口已具备，实际素材留待后续加入。
 6. 运行测试并检查桌面、手机和详情中的实际显示。
 
 联系方式和简历入口集中在 `src/content/profile.ts`。留空时不显示对应动作；公开之前由作者确认。
+
+编排示例（现有项目 ID）：`{ id: "yy", group: "selected", order: 0, visible: true, featured: true, mediaIds: ["cover", "action-stinky"] }`。设置 `visible: false` 只改变展厅呈现；浏览器包和资源地址仍可能包含目录与素材。保密内容应从公开内容源和资产清单中移除。
 
 ## 内容与动效结构
 
 YY 独立角色与主案例角色图共用 `portfolio.ts` 的 `yyAppearance`。更新 YY 源码后运行 `npm run sync:yy`，原样同步现行 SVG 并记录源码哈希；默认定位相邻的 YY 项目，也可以用 `npm run sync:yy -- --source <YY项目路径>` 指定位置。`predev` / `prebuild` 检查本地源码与站点素材一致。CI 没有 YY 仓库时只检查已同步素材的哈希。
 
-首页舞蹈由 `src/components/YYCompanion.tsx` 控制。同步脚本同时导出母版 SVG 分层、现有小黄帽/围巾/脸贴及其锚点依赖、两个现行 `PetSvg` 舞句到 `src/vendor/yy/`。这些导出保持来源哈希校验；修改应先回到权威源码，再显式同步。本网站的改动保持在网站仓库内。
+YY 的源生动作由 YYActionStage 呈现在详情中；YYCompanion 在入口和展厅持续陪伴，复用舞句与三种现有衣物组合，支持点击加演与换装，并遵循系统减少动态偏好。默认穿搭随展区变化，手动选择在本次访问内优先。同步脚本导出母版 SVG 分层、现有小黄帽/围巾/脸贴及锚点依赖到 src/vendor/yy/。修改应先回到权威源码，再显式同步。
 
 旧独立角色 PNG 保存在 `archive/yy-legacy-2026-09-06/`，不进入站点素材和发布包。产品 UI 截图保留实机原图；更新 UI 证据需要从新版应用重新捕获。
 
-- `src/ZinxPortfolio.tsx`：首屏、导航、案例、目录、系统与详情组件。
+- `src/main.tsx` / `src/App.tsx`：单次挂载与独立的组件热更新、入口路由边界。
+- `src/components/PortalEntrance.tsx`：入口、展厅、音效与 YY 伴随层。
+- `src/components/PortalScene.tsx`：机器、滚轮、连杆、部件爆开、程序化烟雾、实体金币、展台与镜头。
+- `src/lib/arcade-state.ts` / `useArcade.ts`：不可变状态机与机械时间线。
+- `src/content/exhibition.ts`：内容适配、章节与展品编排。
+- `src/lib/exhibition-model.ts`：稳定 ID、媒体类型与编排校验。
+- `src/components/ProjectCard.tsx`：沿用内容接口的双面作品金币、真实媒体、悬浮翻转与触摸展开。
+- `src/components/ExhibitionWall.tsx` / `ExhibitDialog.tsx`：自适应金币展台、来源位置展开、媒体与焦点返回。
+- `src/lib/useExhibitionAudio.ts`：声音偏好、手势解锁、页面隐藏时暂停。
+- `src/design/tokens.css` / `PanelBar.tsx`：统一几何、材质和窗口标题栏。
+- `src/ZinxPortfolio.tsx`：共享真实案例、系统展示与详情组件。
 - `src/content/portfolio.ts`：项目、代表案例与工作系统。
 - `src/content/profile.ts`：公开作者链接。
-- `src/components/PixelMatter.tsx`：事件触发的像素引擎。
 - `src/lib/navigation.ts`：图库索引、叙事媒体条件与阶段坐标。
 - `src/lib/motion.ts`：系统与站内减少动态设置。
 - `src/styles.css`：材质、排版、响应式与可访问状态。
 - `content-sources/public-assets.json`：允许进入网站和公开仓库的素材清单。
 
-桌面视口满足宽高条件时，滚动驱动案例阶段。手机、低高度视口与减少动态模式采用紧凑的手动浏览。停用动效后保留所有内容和交互。
+全流程使用同一个按需渲染 Canvas，保持赌场布景连续；展览空闲时不持续绘制。作品金币与详情保持原生 DOM，WebGL 失败直接抵达同一金币展台。媒体默认展示封面；悬停/焦点可静音预览短片，详情点击后加载视频和本地演示。减少动效保留相同内容，YY 停止持续动作。未来作品数量不影响入口符号与相机。
 
 ## GitHub Pages
 

@@ -45,23 +45,6 @@
   line-height: 1.5;
   white-space: nowrap;
 }
-.yy-dance-pause {
-  position: absolute;
-  top: 0;
-  right: -10px;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #d8e1ef;
-  background: #fffffff2;
-  color: #435169;
-  border-radius: 14px;
-  opacity: 0;
-  transition: opacity 180ms ease;
-}
-.yy-companion:hover .yy-dance-pause,
-.yy-companion:focus-within .yy-dance-pause { opacity: 1; }
 .yy-companion[data-feedback="true"] .yy-dance-hint { color: #164fc6; border-color: #9fbffb; }
 @media (max-width: 1080px) {
   .yy-companion { width: 145px; left: -48px; bottom: 82px; }
@@ -70,5 +53,4 @@
   .yy-companion { width: 124px; left: -20px; bottom: 70px; }
   .yy-dance-hint { font-size: 9px; padding: 5px 8px; }
 }
-@media (hover: none) { .yy-dance-pause { opacity: 1; right: -8px; top: -10px; } }
 @media (prefers-reduced-motion: reduce) { .yy-motion { animation: none; } }

@@ -22,12 +22,29 @@ const read = (file) => readFile(new URL(file, root), "utf8");
 
 test("release output contains only reviewed media and git uses the same allowlist", async () => {
   const approved = JSON.parse(await read("content-sources/public-assets.json"));
-  const entries = await readdir(new URL("dist/", root), { recursive: true, withFileTypes: true });
-  const actual = entries.filter(entry => entry.isFile()).map(entry => {
-    return "/" + path.relative(fileURLToPath(new URL("dist/", root)), path.join(entry.parentPath, entry.name)).split(path.sep).join("/");
-  }).filter(file => file !== "/index.html" && !file.startsWith("/assets/"));
+  const entries = await readdir(new URL("dist/", root), {
+    recursive: true,
+    withFileTypes: true,
+  });
+  const actual = entries
+    .filter((entry) => entry.isFile())
+    .map((entry) => {
+      return (
+        "/" +
+        path
+          .relative(
+            fileURLToPath(new URL("dist/", root)),
+            path.join(entry.parentPath, entry.name),
+          )
+          .split(path.sep)
+          .join("/")
+      );
+    })
+    .filter((file) => file !== "/index.html" && !file.startsWith("/assets/"));
   assert.deepEqual(actual.sort(), [...approved].sort());
-  const gitAllowlist = [...(await read(".gitignore")).matchAll(/^!\/public(\/[^*\n]+)$/gm)].map(match => match[1]);
+  const gitAllowlist = [
+    ...(await read(".gitignore")).matchAll(/^!\/public(\/[^*\n]+)$/gm),
+  ].map((match) => match[1]);
   assert.deepEqual(gitAllowlist.sort(), [...approved].sort());
 });
 
@@ -36,6 +53,7 @@ test("build is static and honors GitHub Pages base paths", async () => {
   assert.match(html, /<title>Zinx — AI-Native Product Builder<\/title>/);
   assert.match(html, /assets\/.+\.js/);
   assert.doesNotMatch(html, /_next|wrangler/);
+  assert.doesNotMatch(html, /shushucity-stage|数数城/);
   const base = process.env.VITE_BASE_PATH || "/";
   assert.ok(html.includes(`${base}assets/`));
   await access(new URL("dist/og.png", root));
@@ -63,7 +81,7 @@ test("every public media reference points to a real packaged asset", async () =>
   await Promise.all(
     [...new Set(paths)].map((path) => access(new URL(`dist${path}`, root))),
   );
-  assert.equal(featureCases.length, 3);
+  assert.equal(featureCases.length, 4);
   assert.equal(
     new Set(portfolioProjects.map((item) => item.slug)).size,
     portfolioProjects.length,
@@ -77,13 +95,18 @@ test("every public media reference points to a real packaged asset", async () =>
 test("YY uses one source-locked current appearance across hero, greeting and case", async () => {
   const lock = JSON.parse(await read("content-sources/yy-appearance.json"));
   const svg = await read(`public${lock.asset}`);
-  assert.equal(createHash("sha256").update(svg).digest("hex"), lock.sources.reference.sha256);
+  assert.equal(
+    createHash("sha256").update(svg).digest("hex"),
+    lock.sources.reference.sha256,
+  );
   assert.match(svg, /ry="32"/);
   assert.match(svg, /cx="116" cy="131" r="14"/);
   assert.match(svg, /cx="184" cy="131" r="14"/);
   assert.doesNotMatch(svg, /ry="35"|r="12"/);
-  const component = await read("src/ZinxPortfolio.tsx");
-  assert.match(component, /<YYCompanion\s*\/>/);
+  const component = await read("src/components/PortalScene.tsx");
+  assert.match(await read("src/components/PortalEntrance.tsx"), /<YYCompanion outfit=/);
+  assert.match(await read("src/content/exhibition.ts"), /brand\/yy-base-v13\.svg/);
+  assert.doesNotMatch(await read("src/lib/arcade-state.ts"), /projectIcons|brand\//);
   assert.equal(featureCases[0].steps[0].image, lock.asset);
   for (const text of [component, JSON.stringify(featureCases)]) {
     assert.doesNotMatch(text, /yy-idle-real\.png|yy-dance-real\.png/);
@@ -99,7 +122,12 @@ test("YY dancer exports only current source parts, wardrobe and motion", async (
   const lock = JSON.parse(await read("content-sources/yy-appearance.json"));
   assert.ok(Object.keys(lock.outputs).length >= 8);
   for (const [file, sha256] of Object.entries(lock.outputs)) {
-    assert.equal(createHash("sha256").update(await read(file)).digest("hex"), sha256);
+    assert.equal(
+      createHash("sha256")
+        .update(await read(file))
+        .digest("hex"),
+      sha256,
+    );
   }
   for (const { file } of Object.values(lock.sources)) {
     assert.doesNotMatch(file, /archive|history|preview|legacy/i);
@@ -111,16 +139,20 @@ test("YY dancer exports only current source parts, wardrobe and motion", async (
   for (const item of ["DailyRedScarf", "DailyYellowHat", "DailyStarSticker"]) {
     assert.match(dancer, new RegExp(`<${item}`));
   }
-  assert.doesNotMatch(dancer, /<video|<canvas|yy-(?:idle|dance)-real|archive\//);
+  assert.doesNotMatch(
+    dancer,
+    /<video|<canvas|yy-(?:idle|dance)-real|archive\//,
+  );
 });
 
-test("YY dance loops visibly, pauses accessibly and returns after an encore", async () => {
+test("YY dance loops, respects shared reduced motion and returns after an encore", async () => {
   const dancer = await read("src/components/YYCompanion.tsx");
   assert.match(dancer, /IntersectionObserver/);
   assert.match(dancer, /visibilitychange/);
   assert.match(dancer, /useReducedMotion/);
   assert.match(dancer, /onAnimationEnd/);
-  assert.match(dancer, /暂停 YY 跳舞/);
+  assert.doesNotMatch(dancer, /yy-dance-pause|setPaused/);
+  assert.match(dancer, /inView && pageVisible && !reduced/);
   const css = await read("src/components/YYCompanion.css");
   assert.match(css, /animation-iteration-count:\s*infinite/);
   assert.match(css, /animation-play-state:\s*paused/);
@@ -149,47 +181,84 @@ test("YY case tabs each use their real current-source expression and retain nati
   };
   const bundle = JSON.parse(await read("src/vendor/yy/actions.json"));
   const lock = JSON.parse(await read("content-sources/yy-actions.json"));
-  assert.deepEqual(featureCases[0].steps.map(step => step.yyAction), Object.keys(expected));
-  assert.deepEqual(featureCases[0].steps.map(step => step.label), ["臭臭舞", "手抛球", "旋转手", "冲击波"]);
+  assert.deepEqual(
+    featureCases[0].steps.map((step) => step.yyAction),
+    Object.keys(expected),
+  );
+  assert.deepEqual(
+    featureCases[0].steps.map((step) => step.label),
+    ["臭臭舞", "手抛球", "旋转手", "冲击波"],
+  );
   for (const [id, state] of Object.entries(expected)) {
     assert.equal(bundle[id].state, state);
     assert.match(bundle[id].svg, /data-yy-base-appearance-id="yy_base_v13"/);
-    assert.doesNotMatch(bundle[id].svg, /<image\b|<script\b|\/Users\/|yy-idle-real/);
-    const ids = [...bundle[id].svg.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
+    assert.doesNotMatch(
+      bundle[id].svg,
+      /<image\b|<script\b|\/Users\/|yy-idle-real/,
+    );
+    const ids = [...bundle[id].svg.matchAll(/\sid="([^"]+)"/g)].map(
+      (match) => match[1],
+    );
     assert.equal(new Set(ids).size, ids.length);
-    assert.ok(ids.every(value => value.startsWith(`yy-case-${id}-`)));
+    assert.ok(ids.every((value) => value.startsWith(`yy-case-${id}-`)));
     const sheet = postcss.parse(bundle[id].css);
     const names = new Set();
-    sheet.walkAtRules("keyframes", rule => names.add(rule.params));
+    sheet.walkAtRules("keyframes", (rule) => names.add(rule.params));
     assert.ok(names.size >= 5);
-    sheet.walkDecls(/^animation(?:-name)?$/, decl => {
-      assert.ok(names.has(decl.value.split(/\s+/)[0]), `Missing timeline ${decl.value}`);
+    sheet.walkDecls(/^animation(?:-name)?$/, (decl) => {
+      assert.ok(
+        names.has(decl.value.split(/\s+/)[0]),
+        `Missing timeline ${decl.value}`,
+      );
     });
-    assert.match(bundle[id].stillSvg, /data-yy-base-appearance-id="yy_base_v13"/);
+    assert.match(
+      bundle[id].stillSvg,
+      /data-yy-base-appearance-id="yy_base_v13"/,
+    );
   }
   assert.match(bundle.stinky.svg, /yy_wardrobe_daily_red_scarf/);
   assert.match(bundle.stinky.svg, /yy_wardrobe_daily_yellow_hat/);
   assert.match(bundle.stinky.svg, /yy_wardrobe_daily_star_sticker/);
   assert.match(bundle.juggle.svg, /data-sleep-hat-colorway="yellow"/);
   assert.match(bundle.barrage.svg, /yy_wardrobe_daily_red_scarf/);
-  for (const source of Object.keys(lock.sources)) assert.doesNotMatch(source, /(?:^|\/)(?:archive|history|legacy)(?:\/|$)/i);
-  for (const [file, sha256] of Object.entries(lock.outputs)) assert.equal(createHash("sha256").update(await read(file)).digest("hex"), sha256);
-  const gallery = portfolioProjects.find(project => project.slug === "yy").gallery;
-  assert.deepEqual(gallery.map(frame => frame.src), ["/evidence/yy-wardrobe-real.jpg", "/evidence/yy-journal-real.jpg", "/evidence/yy-school-real.jpg"]);
-  assert.match(await read("src/ZinxPortfolio.tsx"), /if \(project.gallery\) return project.gallery/);
+  for (const source of Object.keys(lock.sources))
+    assert.doesNotMatch(source, /(?:^|\/)(?:archive|history|legacy)(?:\/|$)/i);
+  for (const [file, sha256] of Object.entries(lock.outputs))
+    assert.equal(
+      createHash("sha256")
+        .update(await read(file))
+        .digest("hex"),
+      sha256,
+    );
+  const gallery = portfolioProjects.find(
+    (project) => project.slug === "yy",
+  ).gallery;
+  assert.deepEqual(
+    gallery.map((frame) => frame.src),
+    [
+      "/evidence/yy-wardrobe-real.jpg",
+      "/evidence/yy-journal-real.jpg",
+      "/evidence/yy-school-real.jpg",
+    ],
+  );
+  assert.match(
+    await read("src/ZinxPortfolio.tsx"),
+    /if \(project.gallery\) return project.gallery/,
+  );
 });
 
 test("YY case playback has per-action lifecycle and a dressed reduced-motion still", async () => {
   const component = await read("src/components/YYActionStage.tsx");
-  const page = await read("src/ZinxPortfolio.tsx");
+  const page = await read("src/CreativeWorkshop.tsx");
   const css = await read("src/components/YYActionStage.css");
   assert.match(component, /IntersectionObserver/);
   assert.match(component, /visibilitychange/);
   assert.match(component, /inView && visible && !paused && !reduced/);
   assert.match(component, /reduced \? current.stillSvg : current.svg/);
   assert.match(component, /setReplay\(value => value \+ 1\)/);
-  assert.match(page, /YYActionStage key=\{current.yyAction\}/);
-  assert.match(page, /current.yyAction \? 0 : step/);
+  assert.match(page, /YYActionStage\s+key=\{current.yyAction\}/);
+  assert.match(page, /id="motion-panel"/);
+  assert.match(page, /label="YY 的四个动作"/);
   assert.match(css, /animation-play-state: paused !important/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
@@ -207,16 +276,19 @@ test("gallery wraps within the media-only collection in both directions", () => 
 });
 
 test("layout and motion contracts guard the reproduced regressions", async () => {
-  const [component, css, matter] = await Promise.all([
+  const [component, css, portal] = await Promise.all([
     read("src/ZinxPortfolio.tsx"),
     read("src/styles.css"),
-    read("src/components/PixelMatter.tsx"),
+    read("src/lib/useArcade.ts"),
   ]);
   assert.match(css, /\.zinx-site\s*\{[^}]*overflow:\s*clip/s);
   assert.match(css, /\.case-stage\s*\{[^}]*position:\s*sticky[^}]*100svh/s);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /backdrop-filter:\s*blur/);
-  assert.match(component, /galleryProjects\[index\]\.slug/);
+  assert.match(
+    await read("src/CreativeWorkshop.tsx"),
+    /galleryProjects\[index\]\.slug/,
+  );
   assert.match(component, /element\.showModal\(\)/);
   assert.match(component, /event\.key === "Tab"/);
   assert.match(component, /document\.activeElement === last/);
@@ -225,9 +297,13 @@ test("layout and motion contracts guard the reproduced regressions", async () =>
     component,
     /autoAlpha|ChapterTransition|StoryDock|GenomeBus/,
   );
-  assert.match(matter, /elapsed < 1100/);
-  assert.match(matter, /motion\.addEventListener\("change", clear\)/);
-  assert.doesNotMatch(matter, /addEventListener\("scroll"/);
+  assert.match(portal, /tl.kill\(\)/);
+  assert.match(portal, /clearTimeout\(watchdog\)/);
+  assert.doesNotMatch(component, /reassemble|PixelMatter/);
+  assert.doesNotMatch(
+    await read("src/components/YYCompanion.tsx"),
+    /reassemble|PixelMatter/,
+  );
 });
 
 test("visitor-facing copy excludes internal correction and animation labels", async () => {

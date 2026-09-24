@@ -48,7 +48,7 @@ export type CaseStep = {
 };
 
 export type FeatureCase = {
-  id: "yy" | "dating" | "shushucity";
+  id: "yy" | "dating" | "shushucity" | "monkex";
   number: string;
   eyebrow: string;
   title: string;
@@ -225,6 +225,75 @@ export const featureCases: FeatureCase[] = [
   },
 ];
 
+featureCases.push({
+  id: "monkex",
+  number: "04",
+  eyebrow: "CODEX COMPANION / DESKTOP PRODUCT",
+  title: "Monkex",
+  cn: "像素香蕉任务看板",
+  thesis: "把 Codex 的进展，种在桌面上。",
+  description:
+    "一棵桌面香蕉树，把任务进行中、完成未读和已读映射为绿蕉、黄蕉与香蕉皮。点击任务回到 Codex，收获结果时得到轻量反馈。",
+  status: "0.1.2 Preview · 公开下载",
+  evidence: "MACOS / WINDOWS · PUBLIC PREVIEW",
+  accent: "green",
+  scope: ["PRODUCT", "TAURI", "MOTION", "LOCAL-FIRST"],
+  contribution: "产品构思 · 状态映射与像素交互 · AI 协同开发",
+  decision: "看板观察状态与引导跳转，任务执行与审批保留在 Codex。",
+  outcome: "桌面树、任务看板与采摘反馈",
+  steps: [
+    {
+      label: "看板",
+      title: "任务长成一棵树",
+      copy: "当前产品界面，使用公开示例任务与额度。",
+      image: "/projects/monkex/showcase.png",
+      proof: "MONKEX / PUBLIC SAMPLE UI",
+    },
+  ],
+});
+
+export const caseProcesses: Record<
+  FeatureCase["id"],
+  { problem: string; stages: string[] }
+> = {
+  yy: {
+    problem: "桌面陪伴怎样融入工作，同时给角色留出表达空间？",
+    stages: [
+      "桌面里的陪伴需求",
+      "角色、换装与歪歪之家",
+      "Tauri 与角色动作系统",
+      "原生界面与源生动作",
+    ],
+  },
+  dating: {
+    problem: "零散的约会印象，怎样变成只属于自己的长期记录？",
+    stages: [
+      "记录与回顾的需求",
+      "对象、约会与历史",
+      "本地优先的 iOS 应用",
+      "0.4 开发版界面",
+    ],
+  },
+  shushucity: {
+    problem: "一段普通视频，能否变成像素居民参与的小演出？",
+    stages: [
+      "视频里的动作与声音",
+      "事件驱动的居民反应",
+      "本地分析与合成导出",
+      "素材、舞台与导出界面",
+    ],
+  },
+  monkex: {
+    problem: "多个 AI 任务同时进行时，怎样轻松发现进展和未读结果？",
+    stages: [
+      "任务状态与未读结果",
+      "绿蕉、黄蕉与香蕉皮",
+      "本机看板与跳转反馈",
+      "0.1.2 Preview 公开版本",
+    ],
+  },
+};
+
 // Add a new work here. The selected grid, archive filters and project viewer
 // all read from this single catalog, so no page component needs to be rewritten.
 export const portfolioProjects: PortfolioProject[] = [
@@ -246,9 +315,21 @@ export const portfolioProjects: PortfolioProject[] = [
     },
     links: [{ label: "VIEW FLAGSHIP CASE", href: "#selected-work" }],
     gallery: [
-      { src: "/evidence/yy-wardrobe-real.jpg", title: "歪歪之家 · 衣柜", copy: "套装、皮肤、帽子、耳饰、眼镜和身体装饰统一放在衣柜。" },
-      { src: "/evidence/yy-journal-real.jpg", title: "小手账", copy: "按日期和吃喝、消费、心情、地点、事件整理生活片段。" },
-      { src: "/evidence/yy-school-real.jpg", title: "鼠鼠学校", copy: "移动、跳跃、舞步和情绪表达被组织成不同课程。" },
+      {
+        src: "/evidence/yy-wardrobe-real.jpg",
+        title: "歪歪之家 · 衣柜",
+        copy: "套装、皮肤、帽子、耳饰、眼镜和身体装饰统一放在衣柜。",
+      },
+      {
+        src: "/evidence/yy-journal-real.jpg",
+        title: "小手账",
+        copy: "按日期和吃喝、消费、心情、地点、事件整理生活片段。",
+      },
+      {
+        src: "/evidence/yy-school-real.jpg",
+        title: "鼠鼠学校",
+        copy: "移动、跳跃、舞步和情绪表达被组织成不同课程。",
+      },
     ],
   },
   {
@@ -286,6 +367,44 @@ export const portfolioProjects: PortfolioProject[] = [
       alt: "数数城实际演出界面",
     },
     links: [{ label: "VIEW FLAGSHIP CASE", href: "#selected-work" }],
+  },
+  {
+    slug: "monkex",
+    title: "Monkex",
+    cn: "像素香蕉任务看板",
+    kind: "PRODUCT",
+    status: "PUBLIC PREVIEW",
+    note: "Codex desktop companion",
+    accent: "green",
+    copy: "用桌面香蕉树观察 Codex 任务，发现未读结果，并点击回到原对话。",
+    evidence: "0.1.2 PREVIEW · MACOS / WINDOWS",
+    tags: ["PRODUCT", "TAURI", "LOCAL-FIRST", "MOTION"],
+    decision: "状态可视化与采摘反馈留在桌面，任务执行保留在 Codex。",
+    media: {
+      kind: "image",
+      src: "/projects/monkex/showcase.png",
+      alt: "Monkex 当前产品界面，公开示例任务与额度",
+      fit: "contain",
+    },
+    gallery: [
+      {
+        src: "/projects/monkex/showcase.png",
+        title: "桌面树与任务看板",
+        copy: "当前产品界面使用公开示例数据。绿蕉代表进行中，黄蕉代表完成未读，香蕉皮代表已读。",
+      },
+    ],
+    links: [
+      {
+        label: "下载 Preview",
+        href: "https://github.com/zxzin/Monkex/releases",
+        external: true,
+      },
+      {
+        label: "查看项目",
+        href: "https://github.com/zxzin/Monkex",
+        external: true,
+      },
+    ],
   },
   {
     slug: "zinxcord",

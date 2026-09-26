@@ -6,6 +6,7 @@ import { useReducedMotion } from "../lib/motion";
 import { ExhibitDialog } from "./ExhibitDialog";
 import { PanelBar } from "./PanelBar";
 import { ProjectCard } from "./ProjectCard";
+import { FloralAccent } from "./FloralAccent";
 import { profile } from "../content/profile";
 import "./exhibition.css";
 
@@ -139,6 +140,7 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
     pulse(520);
   };
   return <>
+    <div className="gallery-floral-edge" aria-hidden="true"><FloralAccent /><i /></div>
     <nav className="exhibition-navigation" aria-label="展览章节">
       {exhibition.map(section => <button key={section.id} type="button" aria-current={activeGroup === section.id ? "location" : undefined}
         onClick={() => { root.current?.querySelector("#exhibition-" + section.id)?.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "start" }); pulse(320); }}>
@@ -155,7 +157,7 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
           <button className="redeal-button" type="button" disabled={dealing && !reduced} onClick={redeal}><span aria-hidden="true">◉</span>{dealing && !reduced ? "归位中" : "重新散币"}</button>
         </header>
         {exhibition.map(section => <section className="exhibition-section" id={"exhibition-" + section.id} key={section.id} data-group={section.id}>
-          <header className="exhibition-section-head"><span aria-hidden="true">{section.suit ?? "♠"}</span><h2>{section.title}</h2><small>{section.works.length} 枚</small></header>
+          <header className="exhibition-section-head"><span aria-hidden="true">{section.suit ?? "♠"}</span><h2>{section.title}</h2><FloralAccent className="section-floral" /><small>{section.works.length} 枚</small></header>
           {section.layout === "index" ? <div className="exhibition-index">{section.works.map((item, index) => <button key={item.id} type="button" onClick={event => open(item.id, event.currentTarget)} aria-label={"查看 " + item.title}><small>{String(index + 1).padStart(2, "0")}</small><b>{item.title}</b><span>{item.subtitle}</span><i>↗</i></button>)}</div>
             : <div className={"exhibition-grid layout-" + section.layout}>{section.works.map(item => <ProjectCard key={item.id} work={item} suit={section.suit ?? "♠"} number={visibleExhibits.indexOf(item) + 1} viewed={visited.has(item.id)} revealed={revealed.has(item.id)} onReveal={reveal} onOpen={open} />)}</div>}
         </section>)}

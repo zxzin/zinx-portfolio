@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { spinScore, openingScore, scheduleScore } from "../src/lib/arcade-sound.ts";
+import { backgroundScore, BGM_LOOP_SECONDS, spinScore, openingScore, scheduleScore, createScoreBus } from "../src/lib/arcade-sound.ts";
+import { readFile } from "node:fs/promises";
 import { OPENING_CUES, reelRoundDurations } from "../src/lib/arcade-state.ts";
 
 test("original sound score aligns three rounds, smoke, explosion and coin landing", () => {
@@ -34,15 +35,38 @@ test("explosion score separates pressure, impact, rumble and metallic coin tails
 test("sound scheduling disconnects voices and cancellation stops scheduled sources", () => {
   const sources = [];
   const param = () => ({ value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {} });
-  const node = () => ({ connect() {}, disconnect() {}, frequency: param(), gain: param(), Q: param() });
+  const node = () => ({ connect() {}, disconnect() {}, frequency: param(), gain: param(), pan: param(), Q: param() });
   const source = () => { const s = { ...node(), startAt: -1, stops: [], start(at) { this.startAt = at; }, stop(at) { this.stops.push(at); } }; sources.push(s); return s; };
-  const ctx = { sampleRate: 8000, createGain: node, createBiquadFilter: node, createOscillator: source, createBufferSource: source,
+  const ctx = { sampleRate: 8000, createGain: node, createBiquadFilter: node, createStereoPanner: node, createOscillator: source, createBufferSource: source,
     createBuffer: (_, length) => ({ getChannelData: () => new Float32Array(length) }) };
-  const score = [...spinScore(1, reelRoundDurations(1)), ...openingScore];
+  const score = [...spinScore(1, reelRoundDurations(1)), ...openingScore, ...backgroundScore()];
   const cancel = scheduleScore(ctx, node(), score, 2);
   assert.equal(sources.length, score.length);
   sources.forEach((s, i) => assert.equal(s.startAt, 2 + score[i].at));
   cancel();
   assert.ok(sources.every(s => s.stops.length === 2 && s.stops[1] === undefined));
   sources.forEach(s => s.onended());
+});
+
+test("background groove fits an eight-bar loop with center bass and stereo details", () => {
+  const score = backgroundScore();
+  assert.ok(BGM_LOOP_SECONDS > 17 && BGM_LOOP_SECONDS < 18);
+  assert.ok(score.every(n => n.at >= 0 && n.at + n.duration < BGM_LOOP_SECONDS && n.gain <= .3));
+  for (const kind of ["kick", "bass", "pad", "hat", "clap", "pluck"]) assert.ok(score.some(n => n.kind === kind));
+  assert.ok(score.filter(n => ["bass", "kick"].includes(n.kind)).every(n => !n.pan));
+  assert.ok(score.some(n => n.pan < 0) && score.some(n => n.pan > 0));
+});
+test("shared mix has a bounded soft ceiling and background ducks without restarting", async () => {
+  let shaper;
+  const param = () => ({value:0});
+  const node = () => ({connect(){},gain:param(),threshold:param(),knee:param(),ratio:param(),attack:param(),release:param()});
+  createScoreBus({createGain:node,createDynamicsCompressor:node,createWaveShaper:()=> (shaper=node())},node());
+  assert.ok(shaper.curve.every(n => Number.isFinite(n) && Math.abs(n) < .9));
+  const hook = await readFile(new URL("../src/lib/useExhibitionAudio.ts",import.meta.url),"utf8");
+  assert.match(hook,/loop.loop = true/);
+  assert.match(hook,/mixBackground\(\.105/);
+  assert.match(hook,/audio.current !== ctx/);
+  assert.match(hook,/background.current\?\.stop\(\)/);
+  assert.match(hook,/document.hidden/);
+  assert.match(hook,/amp.connect\(master.current\)/);
 });

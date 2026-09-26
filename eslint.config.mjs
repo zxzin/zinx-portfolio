@@ -15,7 +15,7 @@ const eslintConfig = defineConfig([
   reactHooks.configs.flat["recommended-latest"],
   jsxA11y.flatConfigs.recommended,
   {
-    files: ["src/components/PortalScene.tsx", "src/components/StageCurtain.tsx"],
+    files: ["src/components/PortalScene.tsx", "src/components/StageCurtain.tsx", "src/components/CasinoFlorals.tsx"],
     // R3F JSX maps to Three objects; these properties are checked by TypeScript.
     rules: { "react/no-unknown-property": "off" },
   },

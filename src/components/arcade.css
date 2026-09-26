@@ -38,9 +38,42 @@
 .lever-hit { display: block; width: 62px; height: 62px; border-radius: 50%; background: transparent; border: 0; touch-action: none; cursor: grab !important; transform: translateZ(0); }
 .lever-hit:active { cursor: grabbing !important; }
 .lever-hit:focus-visible, .lever-hit:hover { box-shadow: 0 0 0 1px #fff7; }
-.lever-guide { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; padding: 6px 9px; border-radius: 8px; background: #28121ce8; color: #ffe3ad; box-shadow: 0 1px #f0c27a44; font: 800 13px var(--sans); }
-.lever-guide > span { color: #ffd33d; font-size: 19px; }
-.lever-guide[data-busy=true] { opacity: .65; }
+.lever-guide { position: relative; display: block; width: 142px; padding: 3px; border: 1px solid #f3d390; border-radius: 17px; background: linear-gradient(135deg,#ffedb5,#bc8c43 35%,#654326 70%,#dcba75); color: #fff0ce; box-shadow: inset 0 1px #fff8dc, inset 0 -2px #654523, 0 3px 0 #382219, 0 7px 12px #09040799; font: 850 14px var(--sans); pointer-events: none; animation: lever-guide-arrive .32s ease-out both; }
+.lever-guide-face { position: relative; display: grid; grid-template-columns: 1fr 30px; grid-template-rows: 8px 25px; align-items: center; column-gap: 9px; padding: 8px 11px; overflow: hidden; border: 1px solid #241315; border-radius: 13px; background: linear-gradient(150deg,#57322f,#211219 75%); box-shadow: inset 0 1px 2px #080409, inset 0 -1px #dcb47b6b; }
+.lever-guide-label { grid-column: 1; grid-row: 2; white-space: nowrap; text-shadow: 0 1px 2px #10070a; }
+.lever-guide-lights { display: flex; gap: 5px; }
+.lever-guide-lights i { width: 16px; height: 3px; border-radius: 2px; background: #7b6045; box-shadow: 0 1px #ffe6b526; }
+.lever-guide-lights i[data-lit=true] { background: #ffe5a0; box-shadow: 0 0 5px #ffc7698c; }
+.lever-guide-lights i[data-current=true] { background: #e9a73e; }
+.lever-guide[data-phase=ready] .lever-guide-lights i[data-current=true] { animation: lever-guide-light 2.4s ease-in-out 3; }
+.lever-guide-signal { grid-column: 2; grid-row: 1 / 3; display: grid; place-items: center; height: 34px; border: 1px solid #d8af644d; border-radius: 9px; background: #140c12; box-shadow: inset 0 2px 4px #0009, 0 1px #ffdc9b26; }
+.lever-guide-arrow { width: 22px; height: 27px; fill: none; stroke: #ffda76; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 3px #ffba5370); }
+.lever-guide[data-phase=ready] .lever-guide-arrow { animation: lever-guide-down 2.4s ease-in-out 3; }
+.lever-guide-trail { position: absolute; top: calc(100% + 8px); right: 22px; display: grid; gap: 4px; justify-items: center; }
+.lever-guide-trail i { width: 3px; height: 4px; border-radius: 2px; background: #f6cb76; opacity: .5; box-shadow: 0 0 4px #ffd27a66; }
+.lever-guide[data-phase=ready] .lever-guide-trail i { animation: lever-guide-light 2.4s ease-in-out 3; }
+.lever-guide-trail i:nth-child(2) { animation-delay: .12s !important; }
+.lever-guide-trail i:nth-child(3) { animation-delay: .24s !important; }
+.lever-guide-sheen { position: absolute; inset: 0; background: linear-gradient(110deg,transparent 30%,#ffe3a218 48%,transparent 66%); transform: translateX(-120%); animation: lever-guide-sweep 1.3s ease-out .15s; }
+.lever-guide-reels { display: none; align-items: center; gap: 3px; height: 20px; }
+.lever-guide-reels i { width: 4px; height: 12px; border-radius: 2px; background: #ffe3a2; transform-origin: center; animation: lever-guide-roll .65s ease-in-out infinite alternate; }
+.lever-guide-reels i:nth-child(2) { animation-delay: -.2s; }.lever-guide-reels i:nth-child(3) { animation-delay: -.4s; }
+.lever-guide[data-busy=true] .lever-guide-arrow, .lever-guide[data-busy=true] .lever-guide-trail { display: none; }
+.lever-guide[data-phase=spinning] .lever-guide-reels { display: flex; }
+.lever-guide[data-phase=spinning] .lever-guide-lights i[data-current=true] { background: #ffe5a0; box-shadow: 0 0 6px #ffbd5a99; }
+.lever-hit[data-ready=true]::after { content: ""; position: absolute; inset: -5px; border: 1px solid #ffe2a18c; border-radius: 50%; box-shadow: 0 0 9px #ffc85d40; pointer-events: none; animation: lever-guide-target 2.4s ease-out 3; }
+@keyframes lever-guide-arrive { from { transform: translateY(3px) scale(.98); } to { transform: none; } }
+@keyframes lever-guide-down { 0%, 60%, 100% { transform: translateY(-1px); } 30% { transform: translateY(3px); } }
+@keyframes lever-guide-light { 0%, 65%, 100% { opacity: .45; } 30% { opacity: 1; } }
+@keyframes lever-guide-sweep { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
+@keyframes lever-guide-roll { from { transform: scaleY(.35); opacity: .55; } to { transform: scaleY(1); opacity: 1; } }
+@keyframes lever-guide-target { 0%, 100% { opacity: .3; transform: scale(1); } 45% { opacity: .85; transform: scale(1.12); } }
+html[data-motion=reduced] .lever-guide, html[data-motion=reduced] .lever-guide *, html[data-motion=reduced] .lever-hit::after { animation: none !important; }
+html[data-motion=reduced] .lever-guide-sheen { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .lever-guide, .lever-guide *, .lever-hit::after { animation: none !important; }
+  .lever-guide-sheen { display: none; }
+}
 .arcade-loading { position: absolute; z-index: 17; inset: 0; display: flex; align-items: center; justify-content: center; gap: 18px; background: #21364c; color: #edf6ff; font-size: 15px; }
 .arcade-loading button { border: 1px solid #c6d6e466; color: #edf6ff; border-radius: var(--zx-radius-control); background: transparent; padding: 10px 16px; font: inherit; }
 .arcade-experience kbd { font: 10px var(--mono); display: inline-block; margin: 0 2px; padding: 2px 4px; border: 1px solid #bed2e23d; border-radius: 4px; }
@@ -65,7 +98,11 @@
   .arcade-footer > span { font-size: 8px; letter-spacing: .06em; }
   .arcade-footer button, .arcade-footer a { font-size: 10px; }
   .lever-hit { width: 48px; height: 48px; }
-  .lever-guide { font-size: 11px; gap: 4px; padding: 4px 6px; }
+  .lever-guide { left: -18px; top: -20px; width: 120px; font-size: 12px; border-radius: 15px; }
+  .lever-guide-face { padding: 6px 8px; grid-template-columns: 1fr 26px; column-gap: 6px; border-radius: 11px; }
+  .lever-guide-lights i { width: 12px; }
+  .lever-guide-trail { right: 19px; top: calc(100% + 5px); gap: 3px; }
+  .lever-guide-trail i { height: 3px; }
 }
 @media (prefers-reduced-motion: reduce) { .arcade-header nav a, .arcade-header nav button, .rail-indicator::after { transition: none; } }
 html[data-motion=reduced] .rail-indicator::after { transition: none; }

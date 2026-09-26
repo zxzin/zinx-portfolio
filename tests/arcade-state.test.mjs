@@ -4,6 +4,18 @@ import { readFile } from "node:fs/promises";
 import { arcadeReducer, arcadeStateForRoute, blastEnvelope, canPull, clamp01, initialArcadeState, makeArcadeMotion, nextReelAngle, OPENING_CUES, PULL_THRESHOLD, reelStopSymbol, reelSuits, routeFromHash, spinLightLevel, SYMBOL_COUNT, symbolSuit, TAU } from "../src/lib/arcade-state.ts";
 const event = (state, type, round) => arcadeReducer(state, { type, round });
 const read = path => readFile(new URL("../" + path, import.meta.url), "utf8");
+test("lever light plaque guides ready input and swaps to reels while busy", async () => {
+  const scene = await read("src/components/PortalScene.tsx");
+  const css = await read("src/components/arcade.css");
+  assert.match(scene, /className="lever-guide"[^>]*data-busy=\{!canPull\(state\)\}[^>]*data-phase=\{state.phase\}/);
+  assert.match(scene, /data-lit=\{round < state.shakes\} data-current=\{round === state.shakes\}/);
+  assert.match(scene, /className="lever-hit" data-ready=\{canPull\(state\)\}/);
+  assert.match(css, /\.lever-guide\[data-busy=true\] \.lever-guide-arrow.*display: none/);
+  assert.match(css, /\.lever-guide\[data-phase=spinning\] \.lever-guide-reels \{ display: flex/);
+  assert.match(css, /html\[data-motion=reduced\] \.lever-guide.*animation: none !important/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.lever-guide/);
+  assert.doesNotMatch(css, /\.lever-guide\[data-busy=true\] \{ opacity:/);
+});
 test("curtain reveal gates the lever and direct routes cancel its completion", () => {
   const opening = initialArcadeState();
   assert.equal(opening.phase, "revealing");

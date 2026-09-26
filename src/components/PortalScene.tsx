@@ -5,6 +5,7 @@ import { Environment, Html, Lightformer, MeshReflectorMaterial, RoundedBox, useT
 import * as THREE from "three";
 import { entranceEmblems } from "../content/exhibition";
 import StageCurtain from "./StageCurtain";
+import CasinoFlorals from "./CasinoFlorals";
 import { drawReelEmblem } from "../lib/reel-art";
 import {
   canPull, clamp01, spinLightLevel, blastEnvelope,
@@ -334,7 +335,18 @@ function LeverAssembly({ motion, state, onDragLever, onReleaseLever, onPull }: S
   };
   return <group position={[3.55, 1.83, .05]} name="mechanical-lever">
     {state.inputMode === "entrance" && <Html center position={[-.15, 2.28, .15]} zIndexRange={[12, 11]} style={{ pointerEvents: "none" }}>
-      <span className="lever-guide" data-busy={!canPull(state)}>{state.phase === "revealing" ? "即将开场" : state.phase === "spinning" ? "转动中" : state.shakes === 2 ? "最后一拉" : state.shakes === 1 ? "再拉一次" : "下拉启动"}<span aria-hidden="true">↘</span></span>
+      <span className="lever-guide" key={`${state.phase}-${state.shakes}`} data-busy={!canPull(state)} data-phase={state.phase}>
+        <span className="lever-guide-face">
+          <span className="lever-guide-lights" aria-hidden="true">{[0, 1, 2].map(round => <i key={round} data-lit={round < state.shakes} data-current={round === state.shakes} />)}</span>
+          <span className="lever-guide-label">{state.phase === "revealing" ? "即将开场" : state.phase === "spinning" ? "转动中" : state.shakes === 2 ? "最后一拉" : state.shakes === 1 ? "再拉一次" : "下拉启动"}</span>
+          <span className="lever-guide-signal" aria-hidden="true">
+            <svg className="lever-guide-arrow" viewBox="0 0 24 28"><path d="M6 4l6 6 6-6M6 13l6 6 6-6" /></svg>
+            <span className="lever-guide-reels"><i /><i /><i /></span>
+          </span>
+          <span className="lever-guide-sheen" aria-hidden="true" />
+        </span>
+        <span className="lever-guide-trail" aria-hidden="true"><i /><i /><i /></span>
+      </span>
     </Html>}
     <mesh rotation={[0, 0, Math.PI / 2]} castShadow><cylinderGeometry args={[.3, .3, .58, 32]} /><meshPhysicalMaterial color="#a0b6cc" metalness={.95} roughness={.2} /></mesh>
     <mesh position={[.3, 0, 0]} rotation={[0, 0, Math.PI / 2]}><cylinderGeometry args={[.17, .17, .02, 20]} /><meshStandardMaterial color="#172b43" metalness={.5} /></mesh>
@@ -342,7 +354,7 @@ function LeverAssembly({ motion, state, onDragLever, onReleaseLever, onPull }: S
       <mesh position={[0, .79, 0]} castShadow><cylinderGeometry args={[.057, .073, 1.58, 20]} /><meshPhysicalMaterial color="#e5edf7" metalness={1} roughness={.13} /></mesh>
       <mesh position={[0, 1.64, 0]} castShadow><sphereGeometry args={[.26, 32, 24]} /><meshPhysicalMaterial color="#e6292e" metalness={.18} roughness={.16} clearcoat={1} clearcoatRoughness={.06} /></mesh>
       {state.inputMode === "entrance" && <Html center position={[0, 1.64, 0]} zIndexRange={[12, 11]}>
-        <button className="lever-hit" type="button" aria-label="拉下机器拉杆" aria-keyshortcuts="Space" title="向下拉动" disabled={!canPull(state)}
+        <button className="lever-hit" data-ready={canPull(state)} type="button" aria-label="拉下机器拉杆" aria-keyshortcuts="Space" title="向下拉动" disabled={!canPull(state)}
           onPointerDown={e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); drag.current = { y: e.clientY, value: 0, moved: 0 }; }}
           onPointerMove={e => { if (!drag.current) return; const dy = e.clientY - drag.current.y; drag.current.moved = Math.max(drag.current.moved, Math.abs(dy)); drag.current.value = clamp01(dy / Math.min(125, innerHeight * .14)); onDragLever(drag.current.value); }}
           onPointerUp={e => finish(e)} onPointerCancel={e => finish(e, true)}
@@ -706,6 +718,7 @@ function Scene(props: SceneProps) {
     <TableLighting motion={props.motion} />
     <SlotCabinetShell {...props} />
     <CardTable motion={props.motion} />
+    <CasinoFlorals motion={props.motion} />
     <CoinBurst motion={props.motion} />
     <MachineSmoke motion={props.motion} />
     <BlastImpact motion={props.motion} />

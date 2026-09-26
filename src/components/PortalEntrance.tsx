@@ -21,7 +21,7 @@ const outfitNames = { daily: "出门走走", scarf: "红围巾", hat: "小黄帽
 
 export default function PortalEntrance() {
   const reduced = useReducedMotion();
-  const { enabled, status, toggle, pulse, spin, open, silence } = useExhibitionAudio();
+  const { enabled, status, bgmStatus, toggle, pulse, spin, open, silence } = useExhibitionAudio();
   const [ready, setReady] = useState(false);
   const { state, motion, stage, pull, fail, direct, restart, dragLever, releaseLever } = useArcade(reduced, spin, open, silence, ready);
   const [group, setGroup] = useState("selected");
@@ -43,7 +43,7 @@ export default function PortalEntrance() {
     return () => clearTimeout(timeout);
   }, [ready, state.fallback, exhibition, fail]);
   const replay = () => { if (state.fallback) setReady(false); restart(); };
-  return <div className="arcade-experience" ref={stage} data-input-mode={state.inputMode} data-phase={state.phase} data-shakes={state.shakes} data-render={state.fallback ? "static" : "webgl"} data-ready={ready} data-audio={status}>
+  return <div className="arcade-experience" ref={stage} data-input-mode={state.inputMode} data-phase={state.phase} data-shakes={state.shakes} data-render={state.fallback ? "static" : "webgl"} data-ready={ready} data-audio={status} data-bgm={bgmStatus}>
     <a className="skip-link" href="#hub" onClick={event => { event.preventDefault(); direct(); }}>直接浏览作品</a>
     <div className="arcade-world" aria-hidden={exhibition || undefined}>
       {!state.fallback && <SceneBoundary onError={fail}>

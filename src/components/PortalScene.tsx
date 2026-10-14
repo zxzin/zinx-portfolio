@@ -1,12 +1,18 @@
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Html, Lightformer, MeshReflectorMaterial, RoundedBox, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { entranceEmblems } from "../content/exhibition";
+import { backgroundExhibits, backgroundSlots } from "../content/gallery-background";
 import StageCurtain from "./StageCurtain";
 import CasinoFlorals from "./CasinoFlorals";
+import { DavidSculpture } from "./DavidSculpture";
+import { MediaBoundary } from "./MediaBoundary";
+import { YYCompanion, type YYOutfit } from "./YYCompanion";
+import { galleryLayout } from "../lib/gallery-layout";
 import { drawReelEmblem } from "../lib/reel-art";
+import { coinFlight, COIN_COUNT } from "../lib/arcade-physics";
 import {
   canPull, clamp01, spinLightLevel, blastEnvelope,
   SYMBOL_COUNT, symbolSuit, TAU,
@@ -22,6 +28,9 @@ type SceneProps = {
   onPull: () => void;
   onDragLever: (value: number) => void;
   onReleaseLever: (value: number, tapped: boolean) => void;
+  outfit: YYOutfit;
+  onOutfit: () => void;
+  onCompanion: () => void;
 };
 const colors = ["#eb3d35", "#ffd23a", "#3184ff", "#26ca80"];
 const mix = THREE.MathUtils.lerp;
@@ -93,7 +102,7 @@ function MarqueeLightbox() {
           gl_FragColor=vec4(1.,.79,.48,halo);
         }`} />
     </mesh>
-    <Label text="ZINX  /  CREATIVE PORTAL" at={[0, 4.68, 1.505]} size={[5.55, .35]} color="#152033" background="transparent" />
+    <Label text="ZINX PLAY GALLERY" at={[0, 4.70, 1.505]} size={[5.1, .40]} color="#152033" background="transparent" />
     <rectAreaLight position={[0, 4.68, 1.76]} width={5.9} height={.46} color="#fff0ce" intensity={7} />
   </group>;
 }
@@ -469,14 +478,13 @@ function CoinBurst({ motion }: { motion: ArcadeMotion }) {
     if (!group.current) return;
     group.current.visible = motion.deal > .005;
     group.current.children.forEach((coin, i) => {
-      const p = clamp01((motion.deal - i * .018) / (1 - i * .018));
-      const angle = i * 2.39996;
-      coin.position.set(Math.cos(angle) * (1 + i % 3) * p, 2.6 * (1 - p) + .97 * p + Math.sin(p * Math.PI) * (2 + i % 3 * .4), 1.6 + (3.2 + Math.sin(angle) * 1.5) * p);
-      coin.rotation.set(-Math.PI / 2 * p, Math.PI * 4 * p, angle + Math.sin(p * Math.PI) * 3);
+      const pose = coinFlight(motion.deal, i);
+      coin.position.set(pose.x, pose.y, pose.z);
+      coin.rotation.set(pose.rx, pose.ry, pose.rz);
     });
   });
   return <group ref={group} visible={false} name="burst-gold-coins">
-    {Array.from({ length: 12 }, (_, i) => <group key={i}>
+    {Array.from({ length: COIN_COUNT }, (_, i) => <group key={i}>
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow><cylinderGeometry args={[.31, .31, .085, 48]} /><meshStandardMaterial color="#efbd49" metalness={.9} roughness={.24} /></mesh>
       {[-.05, .05].map(z => <mesh key={z} position={[0, 0, z]}><torusGeometry args={[.266, .018, 8, 48]} /><meshStandardMaterial color="#ffe6a0" metalness={.85} roughness={.19} /></mesh>)}
       <Label text="Z" at={[0, 0, .053]} size={[.29, .3]} color="#93611d" background="transparent" />
@@ -568,48 +576,137 @@ function CardTable({ motion }: { motion: ArcadeMotion }) {
   </group>;
 }
 
-function CasinoSconce({ at }: { at: V3 }) {
-  return <group position={at} name="brass-and-opal-sconce">
-    <Block at={[0, 0, -.06]} size={[.72, 1.8, .16]} color="#493527" metal={.8} radius={.12} />
-    {[-.19, 0, .19].map((x, i) => <Block key={x} at={[x, 0, .06]} size={[.09, 1.15 + (i === 1 ? .24 : 0), .12]} color="#ffe2a7" metal={.05} rough={.3} glow={3} />)}
-    <pointLight position={[0, .1, .46]} color="#ffb85c" intensity={15} distance={5} decay={2} />
-  </group>;
-}
-
 function CasinoArchitecture() {
   const { size } = useThree();
   return <group name="casino-salon">
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.02, -6]} receiveShadow name="polished-stone-floor">
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.42, -6]} receiveShadow name="polished-stone-floor">
       <planeGeometry args={[38, 44]} />
-      <MeshReflectorMaterial resolution={size.width < 700 ? 256 : 512} mirror={.3} mixStrength={.65} color="#21131d" roughness={.34} metalness={.45} />
+      <MeshReflectorMaterial resolution={size.width < 700 ? 256 : 512} mirror={.18} mixStrength={.4} color="#33282b" roughness={.48} metalness={.3} />
     </mesh>
-    <Block at={[0, .005, -7]} size={[7.35, .025, 25]} color="#3e071b" metal={0} rough={.98} coat={0} sheen={.3} radius={.005} />
-    {[-3.72, 3.72].map(x => <Block key={x} at={[x, .02, -7]} size={[.035, .02, 25]} color="#be8946" metal={.8} rough={.24} />)}
-    <Block at={[0, 4, -10]} size={[23, 8, .3]} color="#210817" metal={.05} rough={.96} coat={0} />
-    {[-8, -5.4, -2.7, 0, 2.7, 5.4, 8].map(x => <group key={x}>
-      <Block at={[x, 3.9, -9.77]} size={[2.35, 6.65, .2]} color="#450f28" metal={0} rough={.95} coat={0} sheen={.5} radius={.18} />
-      <Block at={[x - 1.23, 3.9, -9.62]} size={[.035, 6.75, .05]} color="#c99857" metal={.85} />
-    </group>)}
-    {[-1, 1].map(side => <group key={side}>
-      <Block at={[side * 8.3, 3.6, -3]} size={[.3, 7.2, 17]} color="#280b1b" metal={.08} rough={.85} coat={0} />
-      {[-6.8, -2.7, 1.4].map(z => <group key={z} position={[side * 6.3, 0, z]}>
-        <Block at={[0, 3.55, 0]} size={[.5, 7.1, .48]} color="#302322" metal={.72} rough={.22} radius={.08} />
-        <Block at={[-side * .18, 3.5, .26]} size={[.055, 6.6, .06]} color="#ffcb80" metal={.1} glow={1.6} />
-        <CasinoSconce at={[-side * .35, 3.6, .25]} />
+    {/* A single low stone apron joins the central installation and both exhibit wings. */}
+    <Block at={[0, -.19, -1.1]} size={[16.5, .36, 10.6]} color="#4a3439" rough={.67} metal={.12} coat={.12} radius={.8} />
+    <Block at={[0, -.035, -1.11]} size={[16.4, .04, 10.5]} color="#917557" rough={.4} metal={.72} radius={.75} />
+    <Block at={[0, -.007, -1.11]} size={[16.24, .035, 10.35]} color="#392a30" rough={.65} metal={.08} coat={.18} radius={.7} />
+    <Block at={[0, -.18, 4.27]} size={[14.8, .3, .75]} color="#554043" rough={.72} metal={.12} radius={.2} />
+    <Block at={[0, -.31, 4.78]} size={[15.5, .18, .55]} color="#3b2b30" rough={.7} metal={.12} radius={.16} />
+    <Block at={[0, -.021, -1]} size={[7.9, .045, 6.25]} color="#480d26" rough={.98} metal={0} coat={0} sheen={.7} radius={.32} />
+    <Block at={[0, 3.7, -6.3]} size={[23, 8.4, .4]} color="#483438" metal={.05} rough={.96} coat={0} />
+    <InsetPanel at={[0, 3.3, -6.04]} width={9} height={6.5} radius={1.7} color="#917656" rim={.04} />
+    <InsetPanel at={[0, 3.3, -6.01]} width={8.87} height={6.37} radius={1.64} color="#2b1120" />
+    {[-1, 1].map(side => <group key={side} name="gallery-colonnade">
+      <Block at={[side * 8.65, 3.7, -1.5]} size={[.6, 7.4, 10]} color="#32282b" rough={.85} metal={.08} coat={0} />
+      {[-4.5, 1.1].map(z => <group key={z} position={[side * 8.1, 0, z]}>
+        <Block at={[0, 3.45, 0]} size={[.6, 6.9, .65]} color="#6b5653" metal={.15} rough={.6} radius={.12} />
+        {[-.19, -.095, 0, .095, .19].map(x => <Block key={x} at={[x, 3.45, .345]} size={[.025, 6.6, .02]} color="#33272c" rough={.8} radius={.006} />)}
+        <Block at={[0, .15, 0]} size={[.76, .3, .8]} color="#9b7e57" metal={.7} />
+        <Block at={[0, 6.85, 0]} size={[.8, .15, .85]} color="#ac906b" metal={.7} />
       </group>)}
-      <group position={[side * 5.4, 0, -2.6]} name="velvet-banquette">
-        <Block at={[0, .3, 0]} size={[2, .34, 2.5]} color="#6d4c2b" radius={.15} />
-        <Block at={[0, .68, 0]} size={[1.95, .5, 2.3]} color="#69122c" metal={0} rough={.9} coat={0} sheen={.7} radius={.2} />
-        <Block at={[side * .7, 1.19, 0]} size={[.42, 1.3, 2.3]} color="#581022" metal={0} rough={.95} coat={0} sheen={.7} radius={.16} />
-      </group>
-      <pointLight position={[side * 5.6, 1.7, -4.2]} color={side < 0 ? "#ff3569" : "#627cff"} intensity={23} distance={7} decay={2} />
+      <rectAreaLight position={[side * 6, 5.2, -3]} rotation={[-.25, 0, 0]} width={2.5} height={2.5} color="#ffdcbb" intensity={.55} />
     </group>)}
-    {/* Receding brass ceiling coffers establish depth around the hero machine. */}
-    {[-7, -2.5, 2].map(z => <group key={z}>
-      <Block at={[0, 7.05, z]} size={[16.8, .22, .28]} color="#795535" metal={.85} rough={.2} />
-      <Block at={[0, 6.9, z + .03]} size={[15.8, .035, .1]} color="#ffd69a" metal={0} glow={2.8} />
-    </group>)}
-    {[-5.7, 5.7].map(x => <Block key={x} at={[x, 6.92, -3]} size={[.06, .055, 15]} color="#ffcf81" metal={0} glow={2.5} />)}
+    <group name="gallery-ceiling-cove" position={[0, 7.15, -1]}>
+      <Block at={[0, .2, 0]} size={[18, .3, 12]} color="#251a23" rough={.9} metal={.1} />
+      {[1, .976].map((factor, index) => <mesh key={factor} rotation={[Math.PI / 2, 0, 0]} scale={[7.7 * factor, 4.3 * factor, 1]}>
+        <torusGeometry args={[1, index ? .006 : .014, 8, 128]} /><meshStandardMaterial color={index ? "#b79a75" : "#79634e"} emissive="#ffd998" emissiveIntensity={index ? .35 : .02} metalness={.6} roughness={.4} />
+      </mesh>)}
+    </group>
+  </group>;
+}
+
+function GalleryNiche() {
+  return <group name="rounded-exhibit-alcove">
+    <InsetPanel at={[0, 2.8, -.9]} width={3.4} height={5.5} radius={1.5} color="#695341" />
+    <InsetPanel at={[0, 2.8, -.85]} width={3.3} height={5.4} radius={1.45} color="#291820" />
+    <InsetPanel at={[0, 2.8, -.83]} width={3.08} height={5.16} radius={1.35} color="#4d3a30" rim={.023} />
+    <Block at={[0, .1, -.08]} size={[3.55, .19, 2.3]} color="#6c5351" rough={.64} metal={.13} radius={.38} />
+    <Block at={[0, .205, -.08]} size={[3.45, .025, 2.22]} color="#b99b70" rough={.4} metal={.76} radius={.35} />
+  </group>;
+}
+
+function ExhibitPlinth({ height = 1.3, radius = .95 }: { height?: number; radius?: number }) {
+  return <group name="stone-and-brass-plinth">
+    <mesh position={[0, height / 2, 0]} castShadow receiveShadow><cylinderGeometry args={[radius * .9, radius * .94, height, 64]} /><meshPhysicalMaterial color="#6b5053" roughness={.6} metalness={.12} clearcoat={.15} /></mesh>
+    {[.065, height - .015].map(y => <mesh key={y} position={[0, y, 0]} castShadow receiveShadow><cylinderGeometry args={[radius, radius, .075, 64]} /><meshStandardMaterial color="#b89b71" metalness={.8} roughness={.32} /></mesh>)}
+    <mesh position={[0, height + .03, 0]} receiveShadow><cylinderGeometry args={[radius * .97, radius * .97, .04, 64]} /><meshPhysicalMaterial color="#c0ada0" roughness={.52} metalness={.08} /></mesh>
+    {Array.from({ length: 32 }, (_, i) => { const a = i * Math.PI / 16; return <mesh key={i} position={[Math.sin(a) * radius * .933, height * .48, Math.cos(a) * radius * .933]} rotation={[0, a, 0]}><boxGeometry args={[.013, height * .65, .016]} /><meshStandardMaterial color="#48383b" roughness={.8} /></mesh>; })}
+  </group>;
+}
+
+function GalleryPicture({ src }: { src: string }) {
+  const texture = useTexture(import.meta.env.BASE_URL + src.replace(/^\//, ""));
+  return <mesh position={[0, 3.12, -.395]}><planeGeometry args={[1.57, 2.79]} /><meshStandardMaterial map={texture} roughness={.85} metalness={0} envMapIntensity={.1} /></mesh>;
+}
+
+/** A quiet pool of light belongs to each background object, without chase or flash. */
+function GallerySpotlight({ motion, scale, sculpture }: { motion: ArcadeMotion; scale: number; sculpture: boolean }) {
+  const light = useRef<THREE.SpotLight>(null), beam = useRef<THREE.ShaderMaterial>(null);
+  const setup = useMemo(() => {
+    const source = new THREE.Vector3(-.35, 5.85, 1.2), target = new THREE.Object3D();
+    target.position.set(0, 2.75, sculpture ? .15 : -.4);
+    const direction = target.position.clone().sub(source);
+    const length = direction.length();
+    direction.normalize();
+    return { source, target, lightPosition: source.clone().addScaledVector(direction, .19), midpoint: source.clone().add(target.position).multiplyScalar(.5), length, rotation: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), direction) };
+  }, [sculpture]);
+  useFrame(() => {
+    const level = (.25 + .75 * motion.spotlight) * (1 - motion.blackout);
+    if (light.current) light.current.intensity = (sculpture ? 29 : 35) * scale * scale * level;
+    if (beam.current) beam.current.uniforms.strength.value = .045 * level;
+  });
+  return <group name="background-exhibit-spotlight">
+    <Block at={[0, 5.99, .75]} size={[2.1, .045, .08]} color="#4a3c33" metal={.65} />
+    <Block at={[-.35, 5.93, .97]} size={[.055, .1, .45]} color="#72604b" metal={.65} />
+    <group position={setup.source} quaternion={setup.rotation}>
+      <mesh castShadow><cylinderGeometry args={[.13, .16, .3, 24]} /><meshStandardMaterial color="#302b2b" metalness={.65} roughness={.38} /></mesh>
+      <mesh position={[0, -.154, 0]} rotation={[Math.PI / 2, 0, 0]}><circleGeometry args={[.105, 24]} /><meshBasicMaterial color="#cbb89a" /></mesh>
+    </group>
+    <primitive object={setup.target} />
+    <spotLight ref={light} position={setup.lightPosition} target={setup.target} angle={.29} penumbra={.85} intensity={0} color="#ffdfb9" distance={7} castShadow={sculpture} shadow-mapSize={[512, 512]} shadow-normalBias={.025} />
+    <mesh position={setup.midpoint} quaternion={setup.rotation}>
+      <cylinderGeometry args={[.06, .92, setup.length, 32, 1, true]} />
+      <shaderMaterial ref={beam} transparent depthWrite={false} side={THREE.DoubleSide} blending={THREE.AdditiveBlending}
+        uniforms={{ strength: { value: 0 } }}
+        vertexShader={`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`}
+        fragmentShader={`varying vec2 vUv;uniform float strength;void main(){float edge=pow(sin(vUv.x*3.14159),3.);float fade=smoothstep(0.,.3,vUv.y)*(1.-smoothstep(.8,1.,vUv.y));gl_FragColor=vec4(1.,.82,.6,edge*fade*strength);}`} />
+    </mesh>
+  </group>;
+}
+
+function GalleryExhibits({ state, motion, outfit, onOutfit, onCompanion }: SceneProps) {
+  const { size, invalidate } = useThree(), layout = galleryLayout(size.width / size.height);
+  // Html mounts in a separate DOM root; project after that root commits in demand mode.
+  const placeCompanion = useCallback((node: HTMLDivElement | null) => { if (node) invalidate(); }, [invalidate]);
+  const active = state.inputMode === "entrance" && state.phase !== "revealing";
+  return <group name="gallery-permanent-collection">
+    {backgroundExhibits.filter(item => item.visible).map(item => {
+      const slot = backgroundSlots[item.slot];
+      return <group key={item.id} position={slot.position} scale={slot.scale} rotation={[0, slot.rotation, 0]} name={item.kind === "david" ? "david-display-shelf" : "gallery-vj-display"}>
+        <GalleryNiche />
+        {item.kind === "david" ? <group position={[0, .22, .15]}><ExhibitPlinth height={1.3} />
+          <group position={[0, 1.36, 0]} rotation={[0, .3, 0]} scale={.88}><MediaBoundary><Suspense fallback={null}><DavidSculpture /></Suspense></MediaBoundary></group>
+        </group> : <>
+          <Block at={[0, 3.12, -.58]} size={[1.82, 3.04, .23]} color="#7e684e" metal={.65} radius={.08} />
+          <Block at={[0, 3.12, -.447]} size={[1.67, 2.88, .045]} color="#180f18" rough={.6} radius={.025} />
+          <MediaBoundary><Suspense fallback={null}><GalleryPicture src={item.src} /></Suspense></MediaBoundary>
+        </>}
+        <GallerySpotlight motion={motion} scale={slot.scale} sculpture={item.kind === "david"} />
+      </group>;
+    })}
+    <group position={layout.companion} scale={layout.companionScale} name="yy-gallery-podium">
+      <ExhibitPlinth height={1.16} radius={1.02} />
+      <mesh position={[0, 1.216, 0]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[1.7, 1.2]} />
+        <shaderMaterial transparent depthWrite={false} vertexShader={`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`}
+          fragmentShader={`varying vec2 vUv;void main(){float d=length((vUv-.5)*2.);gl_FragColor=vec4(.09,.035,.065,exp(-d*d*5.)*.6);}`} />
+      </mesh>
+      <pointLight position={[-.7, 2.6, 1]} color="#ffdfbc" intensity={1.4} distance={3} />
+      {state.phase !== "revealing" && state.inputMode !== "exhibition" && <>
+        <Html center transform sprite wrapperClass="gallery-yy-projection" position={[0, 2.01, .06]} distanceFactor={6 * layout.companionScale} zIndexRange={[10, 9]}>
+          <div ref={placeCompanion} className="gallery-yy-character" data-crossing={!active} inert={!active}><YYCompanion outfit={outfit} onInteract={onCompanion} idleDance={false} /></div>
+        </Html>
+        <Html center position={[0, .72, 1.025]} zIndexRange={[10, 9]}>
+          <button className="gallery-yy-outfit" type="button" data-crossing={!active} disabled={!active} data-outfit={outfit} aria-label="给 YY 换衣服" onClick={onOutfit}><span>歪歪</span><span>换一套 ↻</span></button>
+        </Html>
+      </>}
+    </group>
   </group>;
 }
 
@@ -630,13 +727,13 @@ function CameraRig({ motion, state }: { motion: ArcadeMotion; state: ArcadeState
   }, [gl]);
   useFrame(() => {
     const aspect = size.width / size.height, mobile = aspect < .9;
-    const distance = Math.max(11.2, 7.85 / (2 * Math.tan(THREE.MathUtils.degToRad(19)) * aspect * .92));
+    const distance = galleryLayout(aspect).distance;
     const p = motion.travel;
-    const start = new THREE.Vector3(mobile ? .2 : 1.35, mobile ? 3.45 : 3.45, distance);
+    const start = new THREE.Vector3(mobile ? .2 : .55, mobile ? 4.1 : 4.45, distance);
     const end = new THREE.Vector3(0, 6.8, distance + 2.5);
     const curve = new THREE.CubicBezierCurve3(start, new THREE.Vector3(.5, 4, distance - .4), new THREE.Vector3(0, 6.5, distance + 1.7), end);
     curve.getPoint(p, eye);
-    target.set(mix(mobile ? .28 : 0, 0, p), mix(2.65, .8, p), mix(0, 3.8, p));
+    target.set(mix(mobile ? .15 : 0, 0, p), mix(mobile ? 2.7 : 2.55, .8, p), mix(0, 3.8, p));
     if (state.inputMode === "entrance") { eye.x += motion.parallaxX; eye.y += motion.parallaxY; }
     const recoil = blastEnvelope(motion.blast).recoil;
     eye.x += recoil * .085; eye.y += recoil * .065; eye.z += recoil * .14;
@@ -715,6 +812,7 @@ function Scene(props: SceneProps) {
     <CameraRig motion={props.motion} state={props.state} />
     <MachineSpotlights motion={props.motion} />
     <CasinoArchitecture />
+    <GalleryExhibits {...props} />
     <TableLighting motion={props.motion} />
     <SlotCabinetShell {...props} />
     <CardTable motion={props.motion} />

@@ -1,4 +1,5 @@
 import { OPENING_CUES } from "./arcade-state.ts";
+import { COIN_COUNT, COIN_FLIGHT_SECONDS, coinContactProgress } from "./arcade-physics.ts";
 /** Original procedural arcade score. Times are relative to the reel's motion start. */
 export type SoundNote = { kind: "kick" | "bass" | "pad" | "pluck" | "clap" | "hat" | "metal" | "tick" | "stop" | "rise" | "chord" | "burst"; at: number; duration: number; frequency: number; gain: number; pan?: number };
 
@@ -62,7 +63,7 @@ export const openingScore: SoundNote[] = [
   { kind: "clap", at: OPENING_CUES.blast + .008, duration: .19, frequency: 1300, gain: .24, pan: -.25 },
   { kind: "metal", at: OPENING_CUES.blast + .025, duration: .32, frequency: 720, gain: .2, pan: .3 },
   ...[.12, .23, .38].map((offset, i) => ({ kind: "burst" as const, at: OPENING_CUES.blast + offset, duration: .18, frequency: 1800 - i * 340, gain: .11 - i * .02 })),
-  ...Array.from({ length: 8 }, (_, i) => ({ kind: "stop" as const, at: .95 + i * .16, duration: .11, frequency: 1400 + i % 3 * 260, gain: .11, pan: (i % 2 ? 1 : -1) * (.2 + i * .06) })),
+  ...Array.from({ length: COIN_COUNT }, (_, i) => ({ kind: "metal" as const, at: OPENING_CUES.coins + coinContactProgress(i) * COIN_FLIGHT_SECONDS, duration: .09, frequency: 1450 + i % 3 * 270, gain: .08, pan: Math.cos(i * 2.39996) * .7 })),
   ...[164.81, 196, 246.94, 329.63].map((frequency, i) => ({ kind: "chord" as const, at: 1.7 + i * .045, duration: .4, frequency, gain: .085, pan: (i - 1.5) * .25 })),
 ];
 

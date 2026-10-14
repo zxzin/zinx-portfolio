@@ -1,0 +1,31 @@
+{
+  "verifiedAt": "2026-10-09",
+  "scope": "Local exhibition curation. No website publication or GitHub push.",
+  "hiddenExhibits": ["videopro"],
+  "films": [
+    {
+      "id": "zinxcord-yy-film",
+      "sourceProject": "屏幕录制/marketing/zinx-yy-film-v4-20261008",
+      "source": "publish/douyin-xhs-20261009/upload/01-录屏小子-YY动效宣传片.mp4",
+      "threadId": "01a10aa8-3414-7161-8f61-c783e023747f",
+      "userApproval": "这个视频可以做好封面发抖音小红书了。",
+      "publicationRecord": "publish/douyin-xhs-20261009/manifest.json",
+      "xiaohongshuStatusAtImport": "submitted-review",
+      "publicVisibilityVerified": false,
+      "durationSeconds": 50.333333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30,
+      "adaptation": "Byte-identical approved Chinese film and horizontal cover. Coin thumbnail extracted at 0.8 seconds, crop x=1060 y=100 width=680 height=680. Original edit and audio preserved.",
+      "assets": [
+        { "asset": "/projects/zinxcord-yy-film/film.mp4", "sha256": "200d835cb1ca8019ba70ed3673d5513a5b8ad1fab7df537ccad5a2bd7d12df42" },
+        { "asset": "/projects/zinxcord-yy-film/poster.png", "sha256": "f29ae314fe54a0551f6c6c1452ce674afc5037d33869ec7724198ea9198afa1a" },
+        { "asset": "/projects/zinxcord-yy-film/emblem.png", "sha256": "5eeac225429feba71cf0573b9932e8c1a5a262c02d9ef26f242fc4bcac19b1eb" }
+      ]
+    }
+  ],
+  "pendingIdentification": [
+    { "title": "YY 表情舞台短片", "threadId": "01a1018b-10ad-7311-baf8-4642536b0615", "reason": "Latest inspected human turn requests visual revisions; approval and Xiaohongshu selection for the current version remain unverified." },
+    { "title": "猫猫裁决官宣传片", "threadId": "01a10154-bf31-7653-b3c5-e61b51c82576", "reason": "Latest inspected human turn requests ending revisions; approval and Xiaohongshu selection for the current version remain unverified." }
+  ]
+}

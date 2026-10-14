@@ -20,7 +20,7 @@ test("original sound score aligns three rounds, smoke, explosion and coin landin
   assert.ok(total < 7 && total > 6);
   assert.equal(openingScore.filter(n => n.kind === "chord").length, 4);
   assert.equal(openingScore.find(n => n.kind === "burst").at, .65);
-  assert.ok(openingScore.filter(n => n.kind === "stop").length >= 6);
+  assert.ok(openingScore.filter(n => n.kind === "metal" && n.at > OPENING_CUES.coins).length >= 6);
 });
 test("explosion score separates pressure, impact, rumble and metallic coin tails", () => {
   const rise = openingScore.find(n => n.kind === "rise");

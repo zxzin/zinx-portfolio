@@ -1,19 +1,21 @@
 import type { Accent, ProjectLink, YYActionId } from "../content/portfolio.ts";
 
-type MediaBase = { id: string; title: string; caption?: string };
+type MediaBase = { id: string; title: string; caption?: string; contentNote?: string };
 export type ExhibitMedia = MediaBase & (
   | { kind: "image"; src: string; alt: string }
   | { kind: "video"; src: string; poster: string }
   | { kind: "animation"; src: string; poster: string; alt: string }
   | { kind: "yy"; action: YYActionId; poster: string }
   | { kind: "demo"; src: string; poster: string }
+  | { kind: "game"; src: string; poster: string; instructions: string }
+  | { kind: "model"; src: string; poster: string }
 );
 export type Exhibit = {
   id: string; title: string; subtitle: string; summary: string; status: string;
   accent: Accent; tags: string[]; media: ExhibitMedia[]; links: ProjectLink[];
   contribution?: string; decision?: string; defaultGroup: string;
-  preview?: { mediaId?: string; caption: string };
-  emblem?: { src: string; treatment: "silhouette" | "tile" };
+  preview?: { mediaId?: string; caption: string; play?: "yy" | "capture" | "tasks" | "film" | "diary" | "sculpture" | "game" | "stickers" };
+  emblem?: { src: string; treatment: "silhouette" | "tile" | "portrait"; focus?: "top" | "center"; fit?: "contain" | "cover" };
 };
 export type ExhibitionGroup = { id: string; title: string; label: string; suit?: string; layout: "salon" | "grid" | "index" };
 export type Placement = { id: string; group?: string; order?: number; visible?: boolean; featured?: boolean; mediaIds?: string[] };

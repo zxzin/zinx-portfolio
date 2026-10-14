@@ -1,0 +1,38 @@
+{
+  "sourceProject": "自媒体/烟嘴空气动力学/air-pop-pilot",
+  "source": "13-air-pop-smooth-v17.mp4",
+  "sourceSha256": "a47a0456da49dd398e9109169dd6aec7799bd398ed31b7b6f009899d7696d854",
+  "emblem": {
+    "asset": "/projects/airflow-study/emblem-v17.png",
+    "source": "13-air-pop-smooth-v17.mp4",
+    "timeSeconds": 28,
+    "sha256": "f4e69591a52741acc629456b1557289db55e500c815b1ec9912c9943b272afcb",
+    "adaptation": "Full native source frame; center-cover layout crops the top and bottom captions inside the existing rounded-square coin bezel. Video and playback poster remain unchanged."
+  },
+  "asset": "/projects/airflow-study/airflow-v17.mp4",
+  "sha256": "2f10e03de29d34a86f8fbeee61e9e18de1b86107849391689545fa31f7c6027d",
+  "bytes": 12477717,
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 720,
+        "height": 1280,
+        "r_frame_rate": "60/1",
+        "side_data_list": [
+          {}
+        ]
+      },
+      {
+        "codec_name": "aac",
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "duration": "32.619000"
+    }
+  },
+  "adaptation": "Full original timeline, 60 fps, 720x1280 web compression; original audio stream copied. Qualitative animation, not measured flow or health evidence."
+}

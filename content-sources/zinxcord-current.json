@@ -1,0 +1,40 @@
+{
+  "sourceProject": "屏幕录制/OpenScreen",
+  "sourceVersion": "1.5.6 / 1.5.34",
+  "capturedAt": "2026-10-03",
+  "harness": "scripts/app-store-preview/index.html",
+  "sourceHashes": {
+    "src/components/launch/LaunchWindow.tsx": "7666102ce7a864da980b2071ee67ee14f95a6d8cd2a0b7c3d4368a41a2ac0c70",
+    "src/components/launch/WebcamOverlay.tsx": "6fc9b0fbd75750bda4e1b9f2c262e5d2f955bd227a2726bf32550ef7cad6acf2",
+    "src/components/launch/RecordingCompletePanel.tsx": "69677a8e5019ea5767115f64ceceb05da1a5d8eccc465231e5c471b33c4aa3e8",
+    "scripts/app-store-preview/preview.tsx": "ce5a8ea0d75638b97009f6acfdc75ff21cdcc3038c80dad855469430e00fb867",
+    "scripts/app-store-preview/preview.css": "c10a17a75382581dca7e87c1a78ff442ba034e9d9e899c63a8efb563aed2c3b0",
+    "scripts/app-store-preview/surface.tsx": "93370c60a006bd98ad3e09b62b975e4b4b53cb5b7b9246db7620fe1a71b36d73",
+    "design/zinxcord-app-icon.png": "0e38c1f8e06edc5220b13dc2b29fcf29441348a9bb4f1c26dfeb423886b994ca"
+  },
+  "components": [
+    "src/components/launch/LaunchWindow.tsx",
+    "src/components/launch/WebcamOverlay.tsx",
+    "src/components/launch/RecordingCompletePanel.tsx"
+  ],
+  "iconSource": "design/zinxcord-app-icon.png",
+  "provenance": "CUA captured current production components with the existing project marketing harness, current approved icon, synthetic pixel-character camera and demo window/file. These are UI demonstrations, not native-recording evidence. Full 2880x1800 captures retained locally; web JPEGs are 1920x1200.",
+  "assets": [
+    {
+      "asset": "/projects/zinxcord/record-current.jpg",
+      "sha256": "8e946fbc270886d54389bf356cb561a1653c789fd50a14bcadf3b90fd9bad764"
+    },
+    {
+      "asset": "/projects/zinxcord/camera-current.jpg",
+      "sha256": "a8188fd187edcfcc7fefd5256dad453b4745ab68243eca53823581122c52d850"
+    },
+    {
+      "asset": "/projects/zinxcord/save-current.jpg",
+      "sha256": "1a451f87df577e6acd3c3dcca59493c94d3624d594793530436154ff482e9549"
+    },
+    {
+      "asset": "/projects/zinxcord/icon.png",
+      "sha256": "0e38c1f8e06edc5220b13dc2b29fcf29441348a9bb4f1c26dfeb423886b994ca"
+    }
+  ]
+}

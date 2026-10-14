@@ -3,6 +3,20 @@
 .arcade-world, .arcade-shade, .arcade-blackout { position: absolute; inset: 0; }
 .arcade-world { touch-action: pan-y; }
 .arcade-world canvas { display: block; touch-action: pan-y; }
+/* Drei's projected wrapper clips the viewport without becoming a focus-scroll container. */
+.gallery-yy-projection { overflow: clip !important; }
+.gallery-yy-character { width: 150px; }
+.gallery-yy-character, .gallery-yy-outfit { transition: opacity .4s ease-out; }
+.gallery-yy-character .yy-companion { position: relative; left: auto; bottom: auto; width: 100%; }
+.gallery-yy-character .yy-dance-trigger { border: 0; background: transparent; }
+.gallery-yy-character .yy-dancer { filter: brightness(.82) saturate(.86) drop-shadow(-2px 2px 1px #8cb7e02b) drop-shadow(3px 3px 2px #5c193154); }
+.gallery-yy-character .yy-dance-hint { position: absolute; left: 50%; top: -16px; transform: translateX(-50%); margin: 0; border: 0; background: #291a25e8; color: #f0d2ac; opacity: 0; transition: opacity .18s; pointer-events: none; }
+.gallery-yy-character:hover .yy-dance-hint, .gallery-yy-character:focus-within .yy-dance-hint, .gallery-yy-character .yy-companion[data-feedback=true] .yy-dance-hint { opacity: 1; }
+.gallery-yy-outfit { display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 5px 12px; border: 1px solid #b89b7166; border-radius: 5px; background: #392931; box-shadow: inset 0 1px #dabe9433; color: #f3ddbe; font: 650 12px var(--sans); white-space: nowrap; opacity: 0; pointer-events: none; }
+.arcade-world:has(.gallery-yy-character:hover, .gallery-yy-character:focus-within, .gallery-yy-character [data-feedback=true]) .gallery-yy-outfit, .gallery-yy-outfit:hover, .gallery-yy-outfit:focus-visible { opacity: 1; pointer-events: auto; }
+.arcade-world .gallery-yy-character[data-crossing=true], .arcade-world .gallery-yy-outfit[data-crossing=true] { opacity: 0; pointer-events: none; }
+.gallery-yy-outfit > span:last-child { color: #cdae7d; font-size: 10px; }
+.gallery-yy-outfit:hover { border-color: #eed2a6; }
 .arcade-shade { pointer-events: none; background: linear-gradient(180deg, #12080f65 0, transparent 22%, transparent 74%, #12080faa); z-index: 2; }
 .arcade-blackout { z-index: 30; pointer-events: none; background: #08101b; opacity: var(--blackout); }
 .stage-curtains { position: absolute; inset: 0; z-index: 14; overflow: hidden; pointer-events: auto; }
@@ -45,6 +59,7 @@
 .lever-guide-lights i { width: 16px; height: 3px; border-radius: 2px; background: #7b6045; box-shadow: 0 1px #ffe6b526; }
 .lever-guide-lights i[data-lit=true] { background: #ffe5a0; box-shadow: 0 0 5px #ffc7698c; }
 .lever-guide-lights i[data-current=true] { background: #e9a73e; }
+.lever-guide[data-phase=ready] .lever-guide-signal { background: linear-gradient(0deg,#e5b55355 calc(var(--lever-load,0) * 100%),#140c12 calc(var(--lever-load,0) * 100%)); }
 .lever-guide[data-phase=ready] .lever-guide-lights i[data-current=true] { animation: lever-guide-light 2.4s ease-in-out 3; }
 .lever-guide-signal { grid-column: 2; grid-row: 1 / 3; display: grid; place-items: center; height: 34px; border: 1px solid #d8af644d; border-radius: 9px; background: #140c12; box-shadow: inset 0 2px 4px #0009, 0 1px #ffdc9b26; }
 .lever-guide-arrow { width: 22px; height: 27px; fill: none; stroke: #ffda76; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 3px #ffba5370); }
@@ -73,6 +88,7 @@ html[data-motion=reduced] .lever-guide-sheen { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .lever-guide, .lever-guide *, .lever-hit::after { animation: none !important; }
   .lever-guide-sheen { display: none; }
+  .gallery-yy-character, .gallery-yy-outfit, .gallery-yy-character .yy-dance-hint { transition: none; }
 }
 .arcade-loading { position: absolute; z-index: 17; inset: 0; display: flex; align-items: center; justify-content: center; gap: 18px; background: #21364c; color: #edf6ff; font-size: 15px; }
 .arcade-loading button { border: 1px solid #c6d6e466; color: #edf6ff; border-radius: var(--zx-radius-control); background: transparent; padding: 10px 16px; font: inherit; }
@@ -98,11 +114,14 @@ html[data-motion=reduced] .lever-guide-sheen { display: none; }
   .arcade-footer > span { font-size: 8px; letter-spacing: .06em; }
   .arcade-footer button, .arcade-footer a { font-size: 10px; }
   .lever-hit { width: 48px; height: 48px; }
-  .lever-guide { left: -18px; top: -20px; width: 120px; font-size: 12px; border-radius: 15px; }
-  .lever-guide-face { padding: 6px 8px; grid-template-columns: 1fr 26px; column-gap: 6px; border-radius: 11px; }
-  .lever-guide-lights i { width: 12px; }
+  .lever-guide { left: 0; top: 0; width: 79px; font-size: 10px; border-radius: 12px; }
+  .lever-guide-face { padding: 5px; grid-template-columns: 1fr 14px; column-gap: 3px; border-radius: 8px; }
+  .lever-guide-lights { gap: 3px; }.lever-guide-lights i { width: 8px; }
+  .lever-guide-signal { height: 27px; border: 0; background: transparent; box-shadow: none; }
+  .lever-guide-arrow { width: 14px; height: 22px; }
   .lever-guide-trail { right: 19px; top: calc(100% + 5px); gap: 3px; }
   .lever-guide-trail i { height: 3px; }
+  .gallery-yy-outfit { padding: 3px 8px; gap: 8px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) { .arcade-header nav a, .arcade-header nav button, .rail-indicator::after { transition: none; } }
 html[data-motion=reduced] .rail-indicator::after { transition: none; }

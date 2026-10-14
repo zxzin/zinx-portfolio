@@ -1,0 +1,22 @@
+.sticker-gallery { width: 100%; color: #fff0d9; }
+.sticker-spotlight { position: relative; isolation: isolate; height: clamp(280px, 43svh, 430px); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 16px; }
+.sticker-spotlight::before { content: ""; position: absolute; z-index: -1; width: min(560px, 100%); height: 100%; top: 0; background: linear-gradient(180deg,#ffe5b512,#ffe5b506 70%,transparent); clip-path: polygon(40% 0,60% 0,100% 100%,0 100%); pointer-events: none; }
+.sticker-act { position: absolute; left: 20px; top: 12px; font: 13px var(--mono); color: #d0b994; }
+.sticker-star { position: relative; width: clamp(200px, 30svh, 300px); height: clamp(200px, 30svh, 300px); flex: none; border: 0; background: transparent; padding: 0; cursor: pointer; z-index: 2; }
+.sticker-star img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 13px 9px #06020866); }
+.sticker-star > span { position: absolute; right: 2px; bottom: 12px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid #d4b77a; border-radius: 50%; background: #271923; color: #ffe5a7; font: 15px var(--sans); }
+.sticker-star:focus-visible { outline: 2px solid #ffe4a3; outline-offset: 5px; border-radius: 28px; }
+.sticker-podium { position: absolute; z-index: -1; width: min(350px, 83%); height: 64px; bottom: 61px; border-radius: 50%; border: 1px solid #b99769; background: radial-gradient(ellipse at 50% 30%,#8b737f,#493c49 65%,#211725); box-shadow: 0 6px #9a7b57,0 9px #23131d,0 19px 0 -3px #34232d,0 25px 0 -4px #816047,0 35px 28px #07040980; }
+.sticker-star-caption { position: relative; z-index: 3; margin-top: 14px; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 18px; }
+.sticker-star-caption strong { font: 650 18px var(--sans); }
+.sticker-cast { display: flex; gap: 10px; width: min(920px, 100%); margin: 0 auto; overflow-x: auto; overscroll-behavior-x: contain; padding: 14px 8px 12px; scrollbar-color: #8d7051 #23151d; scrollbar-width: thin; }
+.sticker-tile { display: flex; flex-direction: column; align-items: center; flex: 0 0 90px; gap: 2px; padding: 5px 3px 9px; border: 1px solid transparent; border-radius: 16px; background: #22172399; color: #d9c8bc; cursor: pointer; transition: transform .22s, background .22s, border-color .22s; }
+.sticker-tile:hover { transform: translateY(-4px); background: #493039; }
+.sticker-tile[aria-pressed=true] { border-color: #dbb776; background: linear-gradient(#594036,#30202b); box-shadow: inset 0 1px #ffe3b03b; color: #fff0d1; }
+.sticker-tile:focus-visible { outline: 2px solid #ffe4a3; outline-offset: 3px; }
+.sticker-tile img { width: 72px; height: 72px; object-fit: contain; pointer-events: none; }
+.sticker-tile span { font: 400 13px/1.4 var(--sans); white-space: nowrap; }
+.sticker-gallery-note { color: #c7b7a7; font: 400 13px/1.5 var(--sans); text-align: center; margin: 5px 0 0; }
+@media (max-width: 600px) { .sticker-act { left: 10px; }.sticker-spotlight { height: 310px; }.sticker-star { width: 220px; height: 220px; }.sticker-tile { flex-basis: 80px; }.sticker-tile img { width: 64px; height: 64px; }.sticker-star-caption { gap: 12px; }.sticker-star-caption strong { font-size: 16px; } }
+@media (prefers-reduced-motion: reduce) { .sticker-tile { transition: none; }.sticker-tile:hover { transform: none; } }
+html[data-motion=reduced] .sticker-tile { transition: none; transform: none; }

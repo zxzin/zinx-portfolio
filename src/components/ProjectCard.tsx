@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import { coinInitials, type PlacedExhibit } from "../lib/exhibition-model";
+import { coinInitials, type Exhibit, type PlacedExhibit } from "../lib/exhibition-model";
 import { assetPath, states } from "../ZinxPortfolio";
 import { useReducedMotion } from "../lib/motion";
 
@@ -21,11 +21,11 @@ function CoinInscription({ title, number, suit }: { title: string; number: numbe
       <path id={id + "-action"} d="M30 140a110 110 0 0 0 220 0" />
     </defs>
     <text className="coin-front-title" textAnchor="middle" textLength={title.length > 16 ? 184 : undefined} lengthAdjust="spacingAndGlyphs"><textPath href={"#" + id + "-title"} startOffset="50%">{title}</textPath></text>
-    <text className="coin-front-action" textAnchor="middle"><textPath href={"#" + id + "-action"} startOffset="50%">{String(number).padStart(2, "0")} · {suit === "♥" ? "产品" : suit === "♣" ? "工具" : "影像"}</textPath></text>
+    <text className="coin-front-action" textAnchor="middle"><textPath href={"#" + id + "-action"} startOffset="50%">{String(number).padStart(2, "0")} · {suit === "♥" ? "产品" : suit === "♣" ? "工具" : suit === "♠" ? "雕塑" : suit === "✦" ? "游戏" : suit === "✿" ? "表情" : "影像"}</textPath></text>
   </svg>;
 }
 
-function CoinEmblem({ work }: { work: PlacedExhibit }) {
+function CoinEmblem({ work }: { work: Exhibit }) {
   const id = "emblem-" + useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -47,20 +47,31 @@ function CoinEmblem({ work }: { work: PlacedExhibit }) {
         <feMerge><feMergeNode in="shadow" /><feMergeNode in="edge" /><feMergeNode in="lip" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
       <clipPath id={id + "-clip"}><rect x="75" y="75" width="130" height="130" rx="25" /></clipPath>
+      <clipPath id={id + "-portrait"}><circle cx="140" cy="140" r="96" /></clipPath>
       <linearGradient id={id + "-glaze"} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff8dc" stopOpacity=".4" /><stop offset=".48" stopColor="#fff8dc" stopOpacity="0" /><stop offset="1" stopColor="#51300d" stopOpacity=".2" /></linearGradient>
     </defs>
     {emblem ? <g filter={`url(#${id}-relief)`}>
-      <image href={assetPath(emblem.src)} x={emblem.treatment === "tile" ? 75 : 42} y={emblem.treatment === "tile" ? 75 : 42} width={emblem.treatment === "tile" ? 130 : 196} height={emblem.treatment === "tile" ? 130 : 196} preserveAspectRatio="xMidYMid meet" clipPath={emblem.treatment === "tile" ? `url(#${id}-clip)` : undefined} />
+      <image href={assetPath(emblem.src)} x={emblem.treatment === "tile" ? 75 : 42} y={emblem.treatment === "tile" ? 75 : 42} width={emblem.treatment === "tile" ? 130 : 196} height={emblem.treatment === "tile" ? 130 : 196} preserveAspectRatio={emblem.treatment === "portrait" || emblem.fit === "cover" ? (emblem.focus === "top" ? "xMidYMin slice" : "xMidYMid slice") : "xMidYMid meet"} clipPath={emblem.treatment === "portrait" ? `url(#${id}-portrait)` : emblem.treatment === "tile" ? `url(#${id}-clip)` : undefined} />
+      {emblem.treatment === "portrait" && <circle cx="140" cy="140" r="96" fill="none" stroke="#ffe6a2" strokeWidth="2" />}
       {emblem.treatment === "tile" && <rect x="75" y="75" width="130" height="130" rx="25" fill={`url(#${id}-glaze)`} stroke="#fff0bf" strokeWidth="1" />}
     </g> : <text x="140" y="164" textAnchor="middle" className="coin-monogram" fill={`url(#${id}-gold)`} stroke="#9a672c" strokeWidth=".7" filter={`url(#${id}-relief)`}>{coinInitials(work.title)}</text>}
   </svg>;
 }
 
+/** Shared minted face links the table, stage entrance and souvenir. */
+export function ExhibitCoin({ work, number = 1, suit }: { work: Exhibit; number?: number; suit: string }) {
+  return <span className="exhibit-coin" aria-hidden="true">
+    <CoinRim inscribed /><CoinInscription title={work.title} number={number} suit={suit} />
+    <span className="coin-metal-field" /><CoinEmblem work={work} />
+  </span>;
+}
+
 /** Product identity on the coin; source-native media stays in the detail viewer. */
-export function ProjectCard({ work, number, suit, viewed, revealed, onReveal, onOpen }: {
+export function ProjectCard({ work, number, suit, viewed, revealed, onReveal, onOpen, onPlay }: {
   work: PlacedExhibit; number: number; suit: string; viewed: boolean; revealed: boolean;
   onReveal: (id: string) => void;
   onOpen: (id: string, target: HTMLButtonElement) => void;
+  onPlay?: (id: string, target: HTMLButtonElement) => void;
 }) {
   const reduced = useReducedMotion();
   const [active, setActive] = useState(false);
@@ -90,7 +101,7 @@ export function ProjectCard({ work, number, suit, viewed, revealed, onReveal, on
     <button ref={card} type="button" className="exhibit-open project-card" data-face-up={faceUp} aria-label={(faceUp ? "查看 " : "翻开 ") + work.title}
       onPointerMove={event => { if (event.pointerType === "mouse") setActive(true); tilt(event); }} onPointerLeave={reset} onPointerCancel={reset}
       onFocus={event => { if (event.currentTarget.matches(":focus-visible")) setActive(true); }} onBlur={reset}
-      onClick={event => { if (!faceUp) { onReveal(work.id); return; } onReveal(work.id); reset(); onOpen(work.id, event.currentTarget); }}>
+      onClick={event => { if (!faceUp) { onReveal(work.id); return; } onReveal(work.id); reset(); (work.preview?.play && onPlay ? onPlay : onOpen)(work.id, event.currentTarget); }}>
       <span className="coin-turner">
         <span className="card-face" aria-hidden={!faceUp}>
           <CoinRim inscribed /><CoinInscription title={work.title} number={number} suit={suit} />
@@ -104,6 +115,9 @@ export function ProjectCard({ work, number, suit, viewed, revealed, onReveal, on
         </span>
       </span>
     </button>
-    <div className="coin-caption"><strong>{work.title}</strong><span>{states[work.status] ?? work.status}</span><p>{work.preview?.caption ?? work.subtitle}</p><small className="coin-visit">{viewed ? "✓ 已看过" : "查看作品 ↗"}</small></div>
+    <div className="coin-caption"><strong>{work.title}</strong><span>{states[work.status] ?? work.status}</span><p>{work.preview?.caption ?? work.subtitle}</p><div className="coin-actions">
+      {work.preview?.play && onPlay && <button className="coin-play-link" onClick={() => { if (card.current) { onReveal(work.id); onPlay(work.id, card.current); } }}>{work.preview.play === "film" ? "先看一段 ▷" : "拿起来玩 ↗"}</button>}
+      <button className="coin-visit" aria-label={"直接查看 " + work.title} onClick={() => { if (card.current) onOpen(work.id, card.current); }}>{viewed ? "✓ 再看看" : "作品详情 ↗"}</button>
+    </div></div>
   </article>;
 }

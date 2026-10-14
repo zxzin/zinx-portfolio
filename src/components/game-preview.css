@@ -1,0 +1,11 @@
+.game-preview { width: 100%; padding: 8px 0; text-align: center; }
+.game-surface { --game-height: clamp(360px,60svh,640px); width: min(100%,calc(var(--game-height) * .5625)); height: var(--game-height); aspect-ratio: 9 / 16; min-height: 300px; margin-inline: auto; overflow: hidden; border-radius: 18px; border: 1px solid #b59b71; background: #101827; box-shadow: 0 0 0 4px #100b16, 0 12px 26px #08040844; }
+.game-surface iframe { display: block; width: 100%; height: 100%; border: 0; }
+.game-cover { width: 100%; height: 100%; position: relative; }
+.game-cover img { width: 100%; height: 100%; object-fit: contain; }
+.game-cover button { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; min-height: 48px; padding: 12px 24px; border: 1px solid #fff1ba; border-radius: 24px; color: #38210e; background: linear-gradient(160deg,#fff2c4,#ddb269); box-shadow: 0 4px 0 #77522b,0 10px 25px #100b1677; font: 750 14px var(--sans); }
+.game-cover button:active { transform: translate(-50%, 2px); }
+.game-cover button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.game-preview p { margin: 15px 8px 4px; font: 400 13px/1.6 var(--sans); }
+.game-preview small { display: block; font: 400 12px/1.6 var(--sans); color: #c6b5a6; }
+.exhibit-player:has(.game-preview) { height: auto; padding: 12px; background: #24151f; color: #efdbc6; }

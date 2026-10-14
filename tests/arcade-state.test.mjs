@@ -268,7 +268,7 @@ test("one shared scene smokes, bursts the machine and throws gold coins onto the
   assert.match(controller, /blast: 1, duration: OPENING_CUES.blastDuration, ease: "none"/);
   assert.match(scene, /name="explosion-impact"/);
   assert.match(scene, /blastEnvelope\(motion.blast\)/);
-  assert.match(controller, /deal: 1, duration: 1.6/);
+  assert.match(controller, /deal: 1, duration: COIN_FLIGHT_SECONDS/);
   assert.match(controller, /tableReveal: 1, duration: \.8/);
   assert.doesNotMatch(scene, /motion\.gate|physical-opening|reel-project-cartridge/);
   assert.doesNotMatch(entrance, /!exhibition && <div className="arcade-world"/);

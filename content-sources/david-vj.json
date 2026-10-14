@@ -1,0 +1,39 @@
+{
+  "sourceProject": "音乐VJ/secret-love-acid-vj-01",
+  "portraits": [
+    {
+      "asset": "/projects/david-sculpture/portrait.png",
+      "source": "publish/v1/source/hero.png",
+      "sha256": "5f33e87ac314b9da0aa64aa84f89372afc415e9df6aff220b936f1c3c27d0f71",
+      "usage": "Clean source cover with the chrome hair and yellow eye band. Original pixels preserved; layout crops focus on the face."
+    },
+    {
+      "asset": "/projects/secret-love-vj/portrait.png",
+      "source": "publish/v26-astra/source/hero.png",
+      "sha256": "41ffcb217d69a2a60c24af7ce70f178d3257e101dca804dd71d4a5d3f8aa9317",
+      "usage": "Clean full-resolution V26 cover artwork. Original pixels preserved; face-centered layout crop."
+    }
+  ],
+  "model": {
+    "source": "public/models/david-smk-90k.glb",
+    "asset": "/projects/david-sculpture/david.glb",
+    "sha256": "6c26020b1c9999f913dfc91d40bc4bbd7aeb3750328a3d1ddf5fddde3e739050",
+    "triangles": 90000,
+    "scan": "SMK KAS2232",
+    "license": "CC0 1.0",
+    "attribution": "https://commons.wikimedia.org/wiki/File:Michelangelo_Buonarroti,_Hoved_fra_statuen_af_David,_,_KAS2232,_Statens_Museum_for_Kunst,_3D_model.stl",
+    "adaptation": "The original scan is unchanged. Web materials and conforming yellow tape are rebuilt for the casino light rig; offline fluid animation is represented by the finished film."
+  },
+  "film": {
+    "source": "成片/02-连续缠绕·最新版.mp4",
+    "version": "V26",
+    "sourceSha256": "2c6340101671e4d4d4a22e4d59f2bbbde1f90083889ba31891994efce4146b36",
+    "asset": "/projects/secret-love-vj/secret-love-v26.mp4",
+    "sha256": "37e08fa99ca178675b1b97aa0470f7e1046c7716b5ee45a708aa913aebf09c98",
+    "durationSeconds": 30,
+    "dimensions": [720, 1280],
+    "adaptation": "Full timeline, 30 fps, web compression only. Source audio retained, playback starts muted.",
+    "music": "声音玩具《秘密的爱》",
+    "musicRights": "Public distribution permission remains unverified. On 2026-10-14 the owner explicitly chose to retain the soundtrack for their personal noncommercial portfolio after this risk was disclosed; this decision is not license evidence."
+  }
+}

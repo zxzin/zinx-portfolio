@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-03",
+  "scope": "Local portfolio additions; no deployment or external publication performed.",
+  "excluded": ["VibeTiming", "蓝鼠线下互动工具", "HomeGuard"],
+  "works": [
+    {
+      "id": "moon-cat",
+      "sourceRoot": "/Users/zin/游戏开发/自媒体/猫猫吃月亮",
+      "gameSource": "index.html",
+      "gameDestination": "/projects/moon-cat/play.html",
+      "gameSha256": "064b9c5681124a31224ff94f2053478f049bc4b101b00acc709fbd92a2d10c6b",
+      "iconSource": "design/icon-candidates-2026-09-25/C-发射猫猫.png",
+      "posterSource": "qa/v6/390x844-ready.png",
+      "adaptations": "Game HTML copied unchanged. Host loads it on demand in an origin-isolated iframe."
+    },
+    {
+      "id": "hamster-pinball",
+      "sourceRoot": "/Users/zin/游戏开发/摸了么/仓鼠弹弹猫",
+      "gameSource": "final线形解锁关卡 copy.html",
+      "sourceSha256": "efd7cd3f0c460807388cb2e5809dd395675092c11f850b4a2b5902053394e92f",
+      "gameDestination": "/projects/hamster-pinball/play.html",
+      "gameSha256": "b4fdff3e30d80e888836c2a54d60fb532024c8d796ce22b62f04112665e4c425",
+      "iconSource": "小红书小工具-上传版/metadata/icon-v3-approved.png",
+      "posterSource": "Browser capture of the packaged game at 390x844 after an actual shot, 2026-10-03.",
+      "adaptations": "Website copy catches blocked storage reads/writes and validates saved level range. In-session progression is retained. Audio starts muted and can be enabled in-game. Original source remains unchanged."
+    },
+    {
+      "id": "cat-judge",
+      "sourceRoot": "/Users/zin/游戏开发/今天开庭App开发",
+      "iconSource": "ios/CourtDay/Assets.xcassets/AppIcon.appiconset/icon.png",
+      "imageSources": ["ios/release-assets/app-store/promo-2026-09-28/raw/home.png", "ios/release-assets/app-store/promo-2026-09-28/raw/choices.png", "ios/release-assets/app-store/promo-2026-09-28/raw/result.png"],
+      "statusEvidence": "ios/.zinxlaunch/qa/owner-submit-progress-2026-10-03.md",
+      "status": "1.0.0 Build 4 submitted for review; public availability unconfirmed. Screenshots only; no backend or download link."
+    }
+  ]
+}

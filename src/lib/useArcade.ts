@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { leverDeflection, COIN_FLIGHT_SECONDS } from "./arcade-physics";
 import {
   arcadeReducer, canPull, clamp01,
   arcadeStateForRoute, makeArcadeMotion, nextReelAngle,
@@ -13,7 +14,7 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
   const [state, dispatch] = useReducer(arcadeReducer, undefined, initial);
   const [motion] = useState(() => {
     const m = makeArcadeMotion(), s = initial();
-    if (s.shakes === 3) { m.curtain = 1; m.spotlight = 1; m.tableReveal = 1; m.travel = 1; m.darkness = 1; m.blast = 1; m.deal = 1; m.lights.fill(1); }
+    if (s.shakes === 3) { m.curtain = 1; m.spotlight = 1; m.tableReveal = 1; m.travel = 1; m.darkness = 1; m.blast = 1; m.deal = 1; m.petals = 1; m.lights.fill(1); }
     return m;
   });
   const stage = useRef<HTMLDivElement>(null);
@@ -22,6 +23,7 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
   const direct = useCallback(() => dispatch({ type: "UNLOCK" }), []);
   const update = useCallback(() => {
     stage.current?.style.setProperty("--blackout", String(motion.blackout));
+    stage.current?.style.setProperty("--lever-load", String(clamp01(motion.lever)));
     if (stage.current) stage.current.dataset.reveal = motion.curtain >= .999 ? "open" : motion.curtain > .4 ? "gathering" : "closed";
     if (stage.current) stage.current.dataset.cameraPass = motion.travel > 0.65 ? "inside" : motion.travel > 0 ? "crossing" : "outside";
     if (stage.current) stage.current.dataset.effect = motion.blast >= .99 ? "settled" : motion.blast > .05 ? "burst" : motion.smoke > .1 ? "smoke" : "ready";
@@ -30,16 +32,17 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
   const dragLever = useCallback((value: number) => {
     if (!canPull(state) || reduced) return;
     gsap.killTweensOf(motion, "lever");
-    motion.lever = clamp01(value);
+    motion.lever = leverDeflection(value);
     update();
   }, [state, reduced, motion, update]);
   const releaseLever = useCallback((value: number, tapped: boolean) => {
     if (!canPull(state)) return;
     if (value >= PULL_THRESHOLD || tapped) pull();
-    else gsap.to(motion, { lever: 0, duration: 0.38, ease: "power3.out", onUpdate: update });
+    else gsap.to(motion, { lever: 0, duration: .52, ease: "back.out(1.25)", onUpdate: update });
   }, [state, motion, pull, update]);
   const restart = useCallback(() => {
-    Object.assign(motion, { lever: 0, tableReveal: 0, travel: 0, darkness: 0, deal: 0, smoke: 0, blast: 0, blackout: 0, parallaxX: 0, parallaxY: 0, kick: 0, spinGlow: 0, spinPhase: 0, stopGlow: 0, curtain: 0, spotlight: 0 });
+    gsap.killTweensOf(motion);
+    Object.assign(motion, { lever: 0, tableReveal: 0, travel: 0, darkness: 0, deal: 0, smoke: 0, blast: 0, petals: 0, blackout: 0, parallaxX: 0, parallaxY: 0, kick: 0, spinGlow: 0, spinPhase: 0, stopGlow: 0, curtain: 0, spotlight: 0 });
     motion.reels.fill(0); motion.lights.fill(0);
     const url = new URL(location.href);
     url.searchParams.delete("render"); url.hash = "top";
@@ -61,14 +64,15 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
         tl.call(() => dispatch({ type: "REVEALED" }), [], 2.55);
       }
     } else if (state.phase === "spinning") {
+      gsap.killTweensOf(motion, "lever");
       const round = state.shakes + 1;
       if (simple) {
         motion.reels = motion.reels.map((a, i) => nextReelAngle(a, reelStopSymbol(i, round), 0));
         tl.call(() => dispatch({ type: "SETTLED", round }), [], 0.16);
       } else {
         {
-          tl.to(motion, { lever: 1, duration: .1, ease: "power2.out" }, 0);
-          tl.to(motion, { lever: 0, duration: .4, ease: "power3.out" }, .12);
+          tl.to(motion, { lever: 1, duration: .1, ease: "power3.in" }, 0);
+          tl.to(motion, { lever: 0, duration: .46, ease: "back.out(1.15)" }, .17);
         }
         const durations = reelRoundDurations(round);
         tl.to(motion, { spinGlow: .75 + round * .08, duration: .18, ease: "power2.out" }, 0);
@@ -96,7 +100,8 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
         tl.call(openSound, [], 0);
         tl.to(motion, { smoke: 1, duration: OPENING_CUES.blast, ease: "power2.in" }, 0);
         tl.to(motion, { blast: 1, duration: OPENING_CUES.blastDuration, ease: "none" }, OPENING_CUES.blast);
-        tl.to(motion, { deal: 1, duration: 1.6, ease: "none" }, OPENING_CUES.coins);
+        tl.to(motion, { deal: 1, duration: COIN_FLIGHT_SECONDS, ease: "none" }, OPENING_CUES.coins);
+        tl.to(motion, { petals: 1, duration: OPENING_CUES.complete - OPENING_CUES.blast, ease: "none" }, OPENING_CUES.blast);
         tl.to(motion, { tableReveal: 1, duration: .8, ease: "power3.inOut" }, .75);
         tl.to(motion, { travel: 1, duration: 1.3, ease: "power2.inOut" }, 1);
         tl.to(motion, { smoke: 0, duration: .85, ease: "power2.in" }, 1.5);
@@ -104,12 +109,13 @@ export function useArcade(reduced: boolean, spin: (round: number, stops: number[
       }
     } else if (state.inputMode === "exhibition") {
       motion.curtain = 1; motion.spotlight = 1;
-      motion.travel = 1; motion.tableReveal = 1; motion.darkness = 1; motion.blast = 1; motion.smoke = 0; motion.deal = 1; motion.lights.fill(1);
+      gsap.killTweensOf(motion, "lever"); motion.lever = 0;
+      motion.travel = 1; motion.tableReveal = 1; motion.darkness = 1; motion.blast = 1; motion.smoke = 0; motion.deal = 1; motion.petals = 1; motion.lights.fill(1);
       update();
     }
     const busy = state.phase !== "ready" && state.phase !== "idle";
     const watchdog = busy ? window.setTimeout(() => dispatch({ type: "FALLBACK" }), 12000) : 0;
-    return () => { tl.kill(); motion.spinGlow = 0; motion.stopGlow = 0; update(); silence(); clearTimeout(watchdog); };
+    return () => { tl.kill(); motion.spinGlow = 0; motion.stopGlow = 0; update(); silence(); gsap.killTweensOf(motion, "lever"); clearTimeout(watchdog); };
   }, [state.phase, state.shakes, state.inputMode, state.fallback, reduced, motion, update, spin, openSound, silence, sceneReady]);
   useEffect(() => {
     const route = routeFromHash(location.hash);

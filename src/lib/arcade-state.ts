@@ -40,7 +40,7 @@ export function arcadeReducer(s: ArcadeState, e: ArcadeEvent): ArcadeState {
 export type ScreenRect = { x: number; y: number; width: number; height: number };
 export type ArcadeMotion = {
   reels: number[]; lights: number[]; lever: number; tableReveal: number; travel: number;
-  darkness: number; deal: number; smoke: number; blast: number;
+  darkness: number; deal: number; smoke: number; blast: number; petals: number;
   parallaxX: number; parallaxY: number; blackout: number; kick: number;
   spinGlow: number; spinPhase: number; stopGlow: number;
   curtain: number; spotlight: number;
@@ -49,7 +49,7 @@ export type ArcadeMotion = {
 export function makeArcadeMotion(): ArcadeMotion {
   const frames = new Set<() => void>();
   return { reels: [0, 0, 0], lights: [0, 0, 0, 0], lever: 0, tableReveal: 0, travel: 0,
-    darkness: 0, deal: 0, smoke: 0, blast: 0, parallaxX: 0, parallaxY: 0, blackout: 0, kick: 0,
+    darkness: 0, deal: 0, smoke: 0, blast: 0, petals: 0, parallaxX: 0, parallaxY: 0, blackout: 0, kick: 0,
     spinGlow: 0, spinPhase: 0, stopGlow: 0, curtain: 0, spotlight: 0,
     frames, invalidate: () => frames.forEach(fn => fn()) };
 }

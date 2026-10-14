@@ -4,15 +4,19 @@ import { exhibition, visibleExhibits } from "../content/exhibition";
 import { routeFromHash, type ScreenRect } from "../lib/arcade-state";
 import { useReducedMotion } from "../lib/motion";
 import { ExhibitDialog } from "./ExhibitDialog";
+import { SouvenirTicket } from "./SouvenirTicket";
+import { useGalleryVisit } from "../lib/useGalleryVisit";
 import { PanelBar } from "./PanelBar";
 import { ProjectCard } from "./ProjectCard";
-import { FloralAccent } from "./FloralAccent";
+import { FloralAccent, TablePetals } from "./FloralAccent";
 import { profile } from "../content/profile";
 import "./exhibition.css";
 
 export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: (frequency: number, duration?: number) => void; onSection: (id: string) => void; onReplay: () => void }) {
   const root = useRef<HTMLElement>(null), heading = useRef<HTMLHeadingElement>(null);
-  const trigger = useRef<HTMLButtonElement | null>(null);
+  const ticketTrigger = useRef<HTMLButtonElement | null>(null);
+  const [ticketOpen, setTicketOpen] = useState(false);
+  const { visit, remember, togglePick } = useGalleryVisit();
   const dealTimeline = useRef<gsap.core.Timeline | null>(null);
   const dealtCards = useRef<HTMLElement[]>([]);
   const [dealing, setDealing] = useState(false);
@@ -21,15 +25,15 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
   const allRevealed = visibleExhibits.every(item => revealed.has(item.id));
   const reduced = useReducedMotion();
   const [activeGroup, setActiveGroup] = useState(exhibition[0]?.id ?? "");
-  const [selection, setSelection] = useState<{ id: string; origin?: ScreenRect } | null>(() => {
+  const [selection, setSelection] = useState<{ id: string; origin?: ScreenRect; experience?: boolean } | null>(() => {
     const id = routeFromHash(location.hash).open;
     return id ? { id } : null;
   });
-  const [visited, setVisited] = useState<Set<string>>(() => new Set(selection ? [selection.id] : []));
-  const remember = useCallback((id: string) => setVisited(previous => new Set([...previous, id])), []);
+  const visited = new Set(visit.seen);
   const viewedCount = visibleExhibits.filter(item => visited.has(item.id)).length;
   const work = visibleExhibits.find(item => item.id === selection?.id);
   const unavailable = selection && !work;
+  useEffect(() => { if (selection) remember(selection.id); }, [selection, remember]);
   const clearDeal = useCallback(() => {
     dealTimeline.current?.kill(); dealTimeline.current = null;
     gsap.set(dealtCards.current, { clearProps: "transform,opacity" });
@@ -58,7 +62,10 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
       .to(cards, { x: (i: number) => offsets[i].x, y: (i: number) => offsets[i].y,
         scale: .3, rotation: (i: number) => (i - (cards.length - 1) / 2) * 5,
         duration: .3, stagger: { each: .035, from: "end" }, ease: "power2.inOut" })
-      .to(cards, { x: 0, y: 0, rotation: 0, scale: 1, duration: .55, stagger: .09, ease: "power3.out" });
+      .to(cards, { x: 0, y: 0, rotation: 2, scale: 1, duration: .48, stagger: .09, ease: "power2.out" })
+      .call(() => pulse(920, .07))
+      .to(cards, { rotation: -1.2, y: -3, duration: .12, stagger: .025, ease: "power2.out" })
+      .to(cards, { rotation: 0, y: 0, duration: .2, stagger: .025, ease: "power2.inOut" });
   };
   useEffect(() => {
     const element = root.current;
@@ -104,6 +111,7 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
   }, [reduced, onSection]);
   useEffect(() => {
     const restoreRoute = () => {
+      setTicketOpen(false);
       const id = routeFromHash(location.hash).open;
       setSelection(id ? { id } : null);
       if (id) remember(id);
@@ -113,28 +121,36 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
     window.addEventListener("popstate", restoreRoute);
     return () => { window.removeEventListener("hashchange", restoreRoute); window.removeEventListener("popstate", restoreRoute); };
   }, [remember]);
-  const open = (id: string, target: HTMLButtonElement) => {
+  const open = (id: string, target?: HTMLButtonElement, experience = false) => {
+    setTicketOpen(false);
     clearDeal(); setDealing(false);
-    const rect = target.getBoundingClientRect();
-    trigger.current = target;
-    setSelection({ id, origin: { x: rect.x, y: rect.y, width: rect.width, height: rect.height } });
+    const rect = target?.getBoundingClientRect();
+    setSelection({ id, experience, origin: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : undefined });
     remember(id);
     history.pushState({ exhibit: id }, "", "#case-" + id);
     pulse(560, .12);
+  };
+  const play = (id: string, target: HTMLButtonElement) => {
+    open(id, target, true);
+  };
+  const openTicket = (target?: HTMLButtonElement) => { ticketTrigger.current = target ?? null; setTicketOpen(true); pulse(650, .08); };
+  const closeTicket = () => {
+    setTicketOpen(false);
+    if (!work) requestAnimationFrame(() => ticketTrigger.current?.focus({ preventScroll: true }));
   };
   const close = useCallback(() => {
     setSelection(null);
     history.replaceState(null, "", "#hub");
   }, []);
   const returnFocus = useCallback(() => {
-    trigger.current?.scrollIntoView({ block: "nearest" });
-    trigger.current?.focus({ preventScroll: true });
-  }, []);
+    const target = root.current?.querySelector<HTMLButtonElement>(`[data-exhibit="${selection?.id}"] .exhibit-open`) ?? heading.current;
+    target?.scrollIntoView({ block: "nearest" });
+    target?.focus({ preventScroll: true });
+  }, [selection?.id]);
   const navigate = (direction: -1 | 1) => {
     const index = visibleExhibits.findIndex(item => item.id === selection?.id);
     const next = visibleExhibits[index + direction];
     if (!next) return;
-    trigger.current = root.current?.querySelector<HTMLButtonElement>(`[data-exhibit="${next.id}"] .exhibit-open`) ?? null;
     setSelection({ id: next.id }); remember(next.id);
     history.replaceState({ exhibit: next.id }, "", "#case-" + next.id);
     pulse(520);
@@ -148,27 +164,35 @@ export default function ExhibitionWall({ pulse, onSection, onReplay }: { pulse: 
       </button>)}
       <span className="exhibition-progress" aria-live="polite">已看 <b>{viewedCount} / {visibleExhibits.length}</b><span aria-hidden="true">{visibleExhibits.map(item => <i key={item.id} data-lit={visited.has(item.id)} />)}</span></span>
     </nav>
-    <main ref={root} className="exhibition-scroll" aria-label="作品金币展台" data-case-open={Boolean(work)}>
+    <main ref={root} className="exhibition-scroll" aria-label="作品金币展台" data-case-open={Boolean(work || ticketOpen)}>
       <div className="exhibition-inner">
+        <TablePetals />
         {unavailable && <p className="exhibition-notice" role="status">这件作品暂未展出，可以先看看下面的作品。</p>}
         <header className="exhibition-intro">
           <h1 ref={heading} tabIndex={-1}>作品</h1>
-          <span className="table-key-hint">悬停翻面 <kbd>Enter</kbd> 打开</span>
+          <span className="table-key-hint">悬停翻面 <kbd>Enter</kbd> 玩一下</span>
           <button className="redeal-button" type="button" disabled={dealing && !reduced} onClick={redeal}><span aria-hidden="true">◉</span>{dealing && !reduced ? "归位中" : "重新散币"}</button>
         </header>
         {exhibition.map(section => <section className="exhibition-section" id={"exhibition-" + section.id} key={section.id} data-group={section.id}>
           <header className="exhibition-section-head"><span aria-hidden="true">{section.suit ?? "♠"}</span><h2>{section.title}</h2><FloralAccent className="section-floral" /><small>{section.works.length} 枚</small></header>
           {section.layout === "index" ? <div className="exhibition-index">{section.works.map((item, index) => <button key={item.id} type="button" onClick={event => open(item.id, event.currentTarget)} aria-label={"查看 " + item.title}><small>{String(index + 1).padStart(2, "0")}</small><b>{item.title}</b><span>{item.subtitle}</span><i>↗</i></button>)}</div>
-            : <div className={"exhibition-grid layout-" + section.layout}>{section.works.map(item => <ProjectCard key={item.id} work={item} suit={section.suit ?? "♠"} number={visibleExhibits.indexOf(item) + 1} viewed={visited.has(item.id)} revealed={revealed.has(item.id)} onReveal={reveal} onOpen={open} />)}</div>}
+            : <div className={"exhibition-grid layout-" + section.layout}>{section.works.map(item => <ProjectCard key={item.id} work={item} suit={section.suit ?? "♠"} number={visibleExhibits.indexOf(item) + 1} viewed={visited.has(item.id)} revealed={revealed.has(item.id)} onReveal={reveal} onOpen={open} onPlay={play} />)}</div>}
         </section>)}
         <section id="exhibition-about" className="exhibition-about" aria-labelledby="about-title">
           <PanelBar code="ZINX">关于我</PanelBar>
           <div><h2 id="about-title">Zinx</h2><p>产品设计、AI 开发、视频创作。</p><a href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</a></div>
         </section>
-        <footer className="exhibition-end"><a href="#top" onClick={event => { event.preventDefault(); onReplay(); }}>重玩开场 ↺</a></footer>
+        <footer className="exhibition-end">
+          <button className="ticket-invitation" onClick={event => openTicket(event.currentTarget)}><span><small>ZINX / COLLECTION</small>生成参观票</span><span aria-hidden="true">↗</span></button>
+          <a href="#top" onClick={event => { event.preventDefault(); onReplay(); }}>重玩开场 ↺</a>
+        </footer>
       </div>
     </main>
-    {!work && <div className="coin-flip-dock"><span>悬停翻面 · 点击查看</span><button type="button" aria-pressed={allRevealed} onClick={() => { setRevealed(allRevealed ? new Set() : new Set(visibleExhibits.map(item => item.id))); pulse(720, .09); }}>{allRevealed ? "全部收回" : "一键翻开"}<span aria-hidden="true"> ↻</span></button></div>}
-    {work && <ExhibitDialog key={work.id} work={work} origin={selection?.origin} onClose={close} returnFocus={returnFocus} pulse={pulse} navigation={{ index: visibleExhibits.indexOf(work), total: visibleExhibits.length, onNavigate: navigate }} />}
+    {!work && !ticketOpen && <div className="coin-flip-dock"><span>悬停翻面 · 拿起来玩</span><button type="button" aria-pressed={allRevealed} onClick={() => { setRevealed(allRevealed ? new Set() : new Set(visibleExhibits.map(item => item.id))); pulse(720, .09); }}>{allRevealed ? "全部收回" : "一键翻开"}<span aria-hidden="true"> ↻</span></button><button className="ticket-dock-button" onClick={event => openTicket(event.currentTarget)}>参观票 · {visit.picks.length}/3</button></div>}
+    {work && !ticketOpen && <ExhibitDialog key={work.id} work={work} origin={selection?.origin} initialExperience={selection?.experience}
+      onClose={close} returnFocus={returnFocus} pulse={pulse} picked={visit.picks.includes(work.id)} ticketCount={visit.picks.length}
+      onPick={() => togglePick(work.id)} onTicket={() => openTicket()}
+      navigation={{ index: visibleExhibits.indexOf(work), total: visibleExhibits.length, onNavigate: navigate }} />}
+    {ticketOpen && <SouvenirTicket visit={visit} onToggle={togglePick} onClose={closeTicket} onOpenWork={id => open(id)} />}
   </>;
 }

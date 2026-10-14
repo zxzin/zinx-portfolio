@@ -108,14 +108,14 @@ test("independent 3D cards use a stable pointer footprint, layered faces and red
 test("all real catalog media are packaged, unique and format-specific", async () => {
   assert.equal(new Set(visibleExhibits.map(item => item.id)).size, visibleExhibits.length);
   assert.equal(exhibition.reduce((n, s) => n + s.works.length, 0), visibleExhibits.length);
-  assert.equal(visibleExhibits.length, 5);
+  assert.equal(visibleExhibits.length, 12);
   assert.ok(exhibitCatalog.length > visibleExhibits.length);
   assert.ok(visibleExhibits.every(work => work.media.length > 0));
-  assert.deepEqual(visibleExhibits.map(work => work.id), ["yy", "dating-diary", "monkex", "zinxcord", "videopro"]);
+  assert.deepEqual(visibleExhibits.map(work => work.id), ["yy", "dating-diary", "cat-judge", "monkex", "zinxcord", "moon-cat", "hamster-pinball", "zinxcord-yy-film", "secret-love-vj", "airflow-study", "yy-stickers", "david-sculpture"]);
   for (const work of visibleExhibits) {
     for (const media of work.media) {
       await access(new URL("../dist" + mediaPoster(media), import.meta.url));
-      if (media.kind === "video" || media.kind === "demo" || media.kind === "animation") await access(new URL("../dist" + media.src, import.meta.url));
+      if (media.kind !== "image" && media.kind !== "yy") await access(new URL("../dist" + media.src, import.meta.url));
     }
   }
   assert.deepEqual(visibleExhibits.find(w => w.id === "yy").media.filter(m => m.kind === "yy").map(m => m.action), ["stinky","juggle","orbit","barrage"]);
@@ -154,13 +154,14 @@ test("renderers preserve full image proportions, focus, paused media and source-
   assert.match(wall, /exhibition.map/);
   assert.match(wall, /popstate/);
   assert.match(wall, /preventScroll: true/);
-  assert.match(dialog, /element.close\(\); returnFocus\(\)/);
+  assert.match(dialog, /element.close\(\)/);
+  assert.match(dialog, /requestAnimationFrame\(returnFocus\)/);
   assert.doesNotMatch(dialog, /document.activeElement/);
   assert.match(dialog, /element.showModal/);
   assert.match(dialog, /onCancel/);
   assert.match(dialog, /visibilitychange/);
   assert.match(dialog, /sandbox="allow-scripts"/);
-  assert.match(css, /object-fit: contain/);
+  assert.match(await read("src/components/exhibit-stage.css"), /object-fit: contain/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(yy, /data-outfit/);
   assert.doesNotMatch(wall, /hubIndex|railOffset|HUB_SLUGS/);

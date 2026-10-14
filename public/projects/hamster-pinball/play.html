@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>仓鼠弹弹猫</title>
+    <style>
+        :root {
+            --primary: #FF9F43;
+            --secondary: #ff6b81;
+            --accent: #5352ed;
+            --bg-dark: #2f3542;
+            --ui-font: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: var(--ui-font);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background: radial-gradient(circle at center, #3d4a5d 0%, #1e272e 100%);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        #safe-area-probe {
+            position: absolute;
+            visibility: hidden;
+            pointer-events: none;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        canvas {
+            background-color: transparent;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.3));
+        }
+
+        .ui-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .screen {
+            background: rgba(30, 39, 46, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-sizing: border-box;
+            padding: clamp(20px, 4vh, 40px) 24px;
+            border-radius: 32px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            pointer-events: auto;
+            max-width: calc(100vw - 24px);
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+            overflow-y: auto;
+            width: 386px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: none;
+            color: #f1f2f6;
+        }
+
+        .screen.active {
+            display: block;
+            animation: popUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 关卡选择窗口特权：绝对置顶 */
+        #level-screen {
+            position: absolute;
+            z-index: 100; /* 最高层级 */
+            margin: auto;
+            inset: 0;
+            height: fit-content;
+        }
+
+        /* 关卡故事居中展示 */
+        #story-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 95;
+        }
+
+        @keyframes popUp {
+            0% { scale: 0.92; opacity: 0; }
+            100% { scale: 1; opacity: 1; }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #ff9f43, #ff6b81);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        p { color: #ced6e0; margin-bottom: 25px; line-height: 1.5; }
+
+        button {
+            background: linear-gradient(135deg, #ff9f43, #ff6b81);
+            color: white; border: none; padding: 14px 40px;
+            font-size: 1.1rem; border-radius: 50px; cursor: pointer;
+            font-weight: bold; font-family: var(--ui-font);
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.3);
+            transition: transform 0.1s;
+            margin-top: 10px;
+            min-width: 180px;
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #a55eea, #45aaf2);
+            box-shadow: 0 8px 20px rgba(165, 94, 234, 0.3);
+        }
+        
+        .btn-back {
+            background: #576574;
+            box-shadow: none;
+            margin-top: 20px;
+            font-size: 1rem;
+            padding: 10px 30px;
+        }
+
+        /* Level Grid */
+        #levels-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .level-btn {
+            background: #2f3542;
+            border: 2px solid #576574;
+            color: #fff;
+            padding: 15px 0;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: auto;
+            margin-top: 0;
+            box-shadow: none;
+        }
+        
+        .level-btn.unlocked {
+            border-color: #ff9f43;
+            background: rgba(255, 159, 67, 0.1);
+            color: #ff9f43;
+        }
+        
+        .level-btn.unlocked:hover {
+            background: #ff9f43;
+            color: white;
+        }
+        
+        .level-btn.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #2f3542;
+            background: #1e272e;
+        }
+
+        #hud {
+            position: absolute; top: max(20px, calc(env(safe-area-inset-top, 0px) + 12px)); left: 20px; right: 20px;
+            display: flex; justify-content: space-between;
+            pointer-events: none; display: none;
+        }
+
+        .hud-card {
+            background: rgba(47, 53, 66, 0.8);
+            padding: 8px 16px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        #score-display { font-size: 1.5rem; font-weight: 900; color: #fff; }
+        #level-display { font-size: 1.2rem; font-weight: 800; color: #ff9f43; margin-bottom: 5px; }
+
+        #combo-badge {
+            position: absolute; top: 80px; left: 20px;
+            background: #ff4757; color: white; padding: 6px 14px;
+            border-radius: 10px; font-weight: 900; opacity: 0;
+            transform: rotate(-5deg); transition: opacity 0.2s;
+        }
+
+        #tutorial-hint {
+            position: absolute; bottom: calc(var(--launch-offset, 140px) + 32px); left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: rgba(47, 53, 66, 0.85);
+            color: #f1f2f6; padding: 12px 16px;
+            border-radius: 14px; font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+            width: max-content; max-width: calc(100vw - 48px); text-align: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s, transform 0.25s;
+        }
+
+        #tutorial-hint.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #balls-counter {
+            background: rgba(47, 53, 66, 0.8);
+            padding: 10px 20px; border-radius: 25px;
+            position: absolute; bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)); left: 20px;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 900; color: #ff9f43;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ball-icon {
+            width: 16px; height: 16px;
+            background: linear-gradient(135deg, #ffa502, #ff6348);
+            border-radius: 50%; border: 2px solid #fff;
+        }
+
+        #audio-btn {
+            position: absolute; bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)); right: 20px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(47, 53, 66, 0.8); color: white;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; pointer-events: auto; font-size: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* --- 新增：全局选关按钮 --- */
+        #global-level-btn {
+            position: absolute; top: max(20px, calc(env(safe-area-inset-top, 0px) + 12px)); right: 20px;
+            padding: 8px 20px; border-radius: 20px;
+            background: rgba(47, 53, 66, 0.9); color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; pointer-events: auto; 
+            font-size: 0.95rem; font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            z-index: 90; /* 高于普通UI，低于选关窗口 */
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        #global-level-btn:active { transform: scale(0.95); }
+        #global-level-btn:hover { background: rgba(255, 159, 67, 0.8); border-color: #ff9f43; }
+
+        #orientation-hint {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 200;
+            background: radial-gradient(circle at center, #3d4a5d 0%, #1e272e 100%);
+            color: #f1f2f6;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        @media (max-height: 520px) and (orientation: landscape) {
+            #orientation-hint { display: flex; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .screen.active { animation: none; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="safe-area-probe" aria-hidden="true"></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud">
+        <div style="display:flex; flex-direction:column; align-items:flex-start;">
+            <div id="level-display">第 1 关</div>
+            <div class="hud-card">
+                <span style="font-size:0.6rem; color:#a4b0be">得分</span>
+                <span id="score-display">0</span>
+            </div>
+        </div>
+        <div id="combo-badge">碰碰 x2</div>
+    </div>
+
+    <div id="tutorial-hint">拖住仓鼠向后拉，松手弹射。击中猫咪会加连击和得分！</div>
+
+    <!-- 全局选关按钮 -->
+    <button id="global-level-btn">☰ 选关</button>
+
+    <div id="balls-counter">
+        <div class="ball-icon"></div>
+        <span id="balls-text">80</span>
+    </div>
+
+    <div id="audio-btn">🔇</div>
+
+    <div class="ui-layer">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>🐹 仓鼠弹弹猫</h1>
+            <p>
+                <b>拖拽仓鼠，开始弹射</b><br>
+                无限连发，无限火力<br>
+                穿越缝隙，把猫打翻！
+            </p>
+            <button id="start-btn">开始游戏</button>
+            <br>
+            <button id="level-select-btn" class="btn-secondary">选择关卡</button>
+        </div>
+
+        <!-- Story Screen -->
+        <div id="story-screen" class="screen">
+            <h1 id="story-title">第 1 关</h1>
+            <p id="story-text">故事加载中...</p>
+            <button id="story-start-btn">开始这一关</button>
+        </div>
+
+        <!-- Level Select Screen -->
+        <div id="level-screen" class="screen">
+            <h1>选择关卡</h1>
+            <p>通过当前关卡以解锁下一关</p>
+            <div id="levels-container">
+                <!-- JS will populate this -->
+            </div>
+            <button id="back-btn" class="btn-back">返回</button>
+        </div>
+
+        <!-- End Screen -->
+        <div id="end-screen" class="screen">
+            <h1 id="end-title">游戏结束</h1>
+            <div style="margin: 20px 0;">
+                <div style="font-size:0.8rem; color:#a4b0be">当前得分</div>
+                <div id="final-score" style="font-size: 2.5rem; font-weight: 900; color: #ff9f43;">0</div>
+            </div>
+            <p id="end-message" style="font-size:0.9rem; color:#2ecc71; display:none;">清屏奖励 +5000</p>
+            <button id="next-level-btn" style="display:none;">进入下一关</button>
+            <button id="retry-btn">重试本关</button>
+            <br>
+            <button id="end-level-select-btn" class="btn-secondary" style="margin-top:10px; font-size: 0.9rem; padding: 10px 30px;">选择其他关卡</button>
+        </div>
+    </div>
+    <div id="orientation-hint"><div>请竖屏游玩<br>旋转手机后即可继续弹射 🐹</div></div>
+</div>
+
+<script>
+/**
+ * 仓鼠弹球：闯关冒险版 v2.3
+ * 更新：恢复关卡解锁进度机制
+ */
+
+const CONFIG = {
+    TOTAL_BALLS: 80, // 初始球数
+    GRAVITY: 0.25, 
+    FRICTION: 0.99,
+    WALL_BOUNCE: 0.7,
+    BUMPER_BOUNCE: 1.6,
+    MAX_SPEED: 35,
+    LAUNCH_MULTIPLIER: 0.26, 
+    MAX_DRAG: 160,
+    RELOAD_TIME: 70, 
+    COMBO_TIMEOUT: 1500,
+    SCORE_HIT: 35,
+    SCORE_KILL: 140,
+    SCORE_COMBO_STEP: 0.18,
+    SCORE_COMBO_MAX: 8,
+    SCORE_BONUS_PER_BALL: 60,
+    
+    HAMSTER_RADIUS: 10,
+    CAT_RADIUS: 13,
+    CAT_HP_MAX: 3, 
+    
+    COLORS: {
+        BUMPER: '#5352ed'
+    }
+};
+
+const CAT_TYPES = [
+    { id: 'calico', name: '三花', color: '#f1f2f6', ears: '#ced6e0', patch1: '#e67e22', patch2: '#2f3542' },
+    { id: 'tabby', name: '狸花', color: '#a4b0be', ears: '#57606f', stripes: '#2f3542' },
+    { id: 'orange', name: '大橘', color: '#ffa502', ears: '#ff6348', stripes: '#ff7f50' },
+    { id: 'siamese', name: '暹罗', color: '#f5e6ca', ears: '#3d2c29', face: '#59433c' },
+    { id: 'black', name: '黑猫', color: '#2f3542', ears: '#1e272e', eyes: '#f1c40f' },
+    { id: 'blue', name: '蓝猫', color: '#747d8c', ears: '#57606f', nose: '#a4b0be' }
+];
+
+const LEVEL_STORIES = {
+    1: { title: '第 1 关 · 街角试炼', text: '仓鼠第一次出勤，巷口的猫咪挡住了去路。先热热手，摸清弹射节奏。' },
+    2: { title: '第 2 关 · 环形围堵', text: '猫咪结成了圆阵。找准空隙，打破包围圈！' },
+    3: { title: '第 3 关 · 断桥飞越', text: '中段出现断墙与缝隙，仓鼠要在狭窄通道中开辟路线。' },
+    4: { title: '第 4 关 · 追逐回廊', text: '猫咪开始巡逻移动，速度更快，角度更刁钻。' },
+    5: { title: '第 5 关 · 猫王现身', text: '猫王登场！护卫环绕，破防才是胜利关键。' },
+    6: { title: '第 6 关 · 无限猫咪', text: '猫群汹涌无尽，仓鼠火力全开。撑住越久越强！' }
+};
+
+const state = {
+    status: 'IDLE',
+    level: 1,
+    maxUnlockedLevel: 1, 
+    maxLevels: 6, // 增加到6关
+    pendingLevel: null,
+    score: 0,
+    ballsLeft: CONFIG.TOTAL_BALLS,
+    activeBalls: [],
+    readyBall: null,
+    targets: [],
+    bumpers: [], 
+    spinners: [], 
+    particles: [],
+    floatingTexts: [],
+    shockwaves: [],
+    combo: 0,
+    comboTimer: null,
+    tutorialTimer: null,
+    width: 0,
+    height: 0,
+    scale: 1,
+    layout: null,
+    isLandscape: false,
+    dragStart: null,
+    dragCurrent: null,
+    shake: 0,
+    hitStop: 0,
+    isEnding: false, 
+    isMuted: true,
+    arena: null // Level 6 arena params
+};
+
+const AudioSys = {
+    ctx: null,
+    init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    play(type, vol = 0.1) {
+        if (state.isMuted || !this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        const now = this.ctx.currentTime;
+        if (type === 'launch') {
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+            gain.gain.setValueAtTime(vol, now);
+            osc.start(); osc.stop(now + 0.1);
+        } else if (type === 'hit') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(200 + Math.random() * 300, now);
+            osc.frequency.exponentialRampToValueAtTime(50, now + 0.1);
+            gain.gain.setValueAtTime(vol * 1.5, now);
+            osc.start(); osc.stop(now + 0.1);
+        } else if (type === 'flyout') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+            gain.gain.setValueAtTime(vol * 1.2, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(); osc.stop(now + 0.3);
+        } else if (type === 'win') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.linearRampToValueAtTime(800, now + 0.2);
+            gain.gain.setValueAtTime(vol, now);
+            osc.start(); osc.stop(now + 0.4);
+        }
+    }
+};
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+window.onload = function() {
+    init();
+};
+
+function init() {
+    resize();
+    window.addEventListener('resize', resize);
+    canvas.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', cancelDrag);
+    window.addEventListener('blur', cancelDrag);
+    
+    // Sandboxed portfolio play retains session progress when storage is unavailable.
+    try {
+        const saved = Number(localStorage.getItem('hamster_pinball_level'));
+        state.maxUnlockedLevel = Number.isInteger(saved) && saved >= 1 && saved <= state.maxLevels ? saved : 1;
+    } catch { state.maxUnlockedLevel = 1; }
+    
+    const bindClick = (id, handler) => {
+        const el = document.getElementById(id);
+        if (el) el.onclick = handler;
+    };
+
+    // 开始按钮逻辑：继续最高进度
+    bindClick('start-btn', () => requestStartGame(state.maxUnlockedLevel)); 
+    
+    const startBtn = document.getElementById('start-btn');
+    if(startBtn) {
+        startBtn.textContent = state.maxUnlockedLevel === 1 ? `开始游戏` : `继续第 ${state.maxUnlockedLevel} 关`;
+        if (state.maxUnlockedLevel === 6) startBtn.textContent = "开始无限猫咪";
+    }
+    
+    bindClick('retry-btn', () => requestStartGame(state.level));
+    bindClick('next-level-btn', () => requestStartGame(state.level + 1));
+    bindClick('story-start-btn', () => {
+        if (state.pendingLevel) startGame(state.pendingLevel);
+    });
+    bindClick('global-level-btn', showLevelSelect);
+    bindClick('end-level-select-btn', showLevelSelect);
+    bindClick('level-select-btn', showLevelSelect);
+    bindClick('back-btn', () => {
+        document.getElementById('level-screen').classList.remove('active');
+    });
+    
+    bindClick('audio-btn', () => {
+        state.isMuted = !state.isMuted;
+        const btn = document.getElementById('audio-btn');
+        if(btn) btn.textContent = state.isMuted ? '🔇' : '🔊';
+    });
+
+    requestAnimationFrame(loop);
+}
+
+function showLevelSelect() {
+    document.getElementById('level-screen').classList.add('active');
+    
+    const container = document.getElementById('levels-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    for (let i = 1; i <= state.maxLevels; i++) {
+        const btn = document.createElement('button');
+        // 根据解锁状态设置样式
+        btn.className = `level-btn ${i <= state.maxUnlockedLevel ? 'unlocked' : 'locked'}`;
+        btn.textContent = i === 6 ? "∞" : i;
+        btn.title = i === 6 ? "无限猫咪" : `第 ${i} 关`;
+        
+        // 只有解锁的关卡可以点击
+        if (i <= state.maxUnlockedLevel) {
+            btn.onclick = () => {
+                requestStartGame(i);
+                document.getElementById('level-screen').classList.remove('active'); 
+            }
+        }
+        container.appendChild(btn);
+    }
+}
+
+function requestStartGame(level) {
+    state.pendingLevel = level;
+    showStory(level);
+}
+
+function showStory(level) {
+    const data = LEVEL_STORIES[level] || { title: `第 ${level} 关`, text: '新的挑战开始了。' };
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('story-title').textContent = data.title;
+    document.getElementById('story-text').textContent = data.text;
+    document.getElementById('story-screen').classList.add('active');
+    document.getElementById('hud').style.display = 'none';
+    hideTutorial();
+}
+
+function showTutorial() {
+    const el = document.getElementById('tutorial-hint');
+    if (!el) return;
+    el.classList.add('active');
+    if (state.tutorialTimer) clearTimeout(state.tutorialTimer);
+    state.tutorialTimer = setTimeout(() => hideTutorial(), 6000);
+}
+
+function hideTutorial() {
+    const el = document.getElementById('tutorial-hint');
+    if (!el) return;
+    el.classList.remove('active');
+    if (state.tutorialTimer) {
+        clearTimeout(state.tutorialTimer);
+        state.tutorialTimer = null;
+    }
+}
+
+function getLayout(width, height) {
+    const probe = getComputedStyle(document.getElementById('safe-area-probe'));
+    const safeTop = parseFloat(probe.paddingTop) || 0;
+    const safeBottom = parseFloat(probe.paddingBottom) || 0;
+    const launchOffset = Math.max(safeBottom + 88, Math.min(140, height * 0.17));
+    const launchY = height - launchOffset;
+    return {
+        top: Math.max(140 + safeTop, Math.min(160 + safeTop, height * 0.19 + safeTop)),
+        bottom: launchY - Math.max(68, Math.min(100, height * 0.11)),
+        launchY,
+        launchOffset
+    };
+}
+
+function fitLevelY(y, top, bottom) {
+    const available = state.layout.bottom - state.layout.top;
+    const scale = Math.min(1, available / (bottom - top));
+    const fittedTop = Math.max(state.layout.top, Math.min(top, state.layout.bottom - (bottom - top) * scale));
+    return fittedTop + (y - top) * scale;
+}
+
+function resize() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    state.isLandscape = w > h && h <= 520;
+    if (state.isLandscape) {
+        cancelDrag();
+        return;
+    }
+
+    const oldWidth = state.width;
+    const oldHeight = state.height;
+    const oldLayout = state.layout;
+    state.width = Math.min(w, h * 0.7);
+    state.height = h;
+    state.layout = getLayout(state.width, h);
+    state.scale = Math.min(window.devicePixelRatio || 1, 2);
+    document.documentElement.style.setProperty('--launch-offset', state.layout.launchOffset + 'px');
+    canvas.style.width = state.width + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width = Math.round(state.width * state.scale);
+    canvas.height = Math.round(h * state.scale);
+    ctx.setTransform(state.scale, 0, 0, state.scale, 0, 0);
+
+    if (oldLayout && state.status === 'RUNNING' && (oldWidth !== state.width || oldHeight !== h)) {
+        reflowLevel(oldWidth, oldHeight, oldLayout);
+    }
+}
+
+function reflowLevel(oldWidth, oldHeight, oldLayout) {
+    const h = state.height;
+    const xRatio = state.width / oldWidth;
+    const yRatio = (state.layout.bottom - state.layout.top) / (oldLayout.bottom - oldLayout.top);
+    const sceneY = y => state.layout.top + (y - oldLayout.top) * yRatio;
+    const scaleX = item => {
+        item.x *= xRatio;
+        if (item.baseX !== undefined) item.baseX *= xRatio;
+    };
+    state.targets.forEach(t => {
+        scaleX(t);
+        t.y = sceneY(t.y);
+        if (t.baseY !== undefined) t.baseY = sceneY(t.baseY);
+        if (t.orbitR !== undefined) t.orbitR *= Math.min(xRatio, yRatio);
+    });
+    state.bumpers.forEach(b => {
+        scaleX(b);
+        b.y = sceneY(b.y);
+        if (b.patrolMin !== undefined) b.patrolMin *= xRatio;
+        if (b.patrolMax !== undefined) b.patrolMax *= xRatio;
+    });
+    state.spinners.forEach(s => {
+        scaleX(s);
+        s.y = sceneY(s.y);
+        s.armLength *= Math.min(xRatio, yRatio);
+    });
+    if (state.arena) {
+        scaleX(state.arena);
+        state.arena.y = sceneY(state.arena.y);
+        state.arena.r *= Math.min(xRatio, yRatio);
+    }
+    state.activeBalls.forEach(b => {
+        scaleX(b);
+        b.y *= h / oldHeight;
+        b.vx *= xRatio;
+        b.vy *= h / oldHeight;
+    });
+    if (state.readyBall) {
+        state.readyBall.x = state.width / 2;
+        state.readyBall.y = state.layout.launchY;
+    }
+    state.particles.forEach(p => { scaleX(p); p.y *= h / oldHeight; });
+    state.shockwaves.forEach(s => { scaleX(s); s.y = sceneY(s.y); });
+    state.floatingTexts.forEach(t => { scaleX(t); t.y = sceneY(t.y); });
+    cancelDrag();
+}
+
+function startGame(level) {
+    AudioSys.init();
+    state.status = 'RUNNING';
+    state.level = level;
+    state.pendingLevel = null;
+    state.isEnding = false;
+    state.arena = null;
+    
+    if (level === 1) {
+        state.score = 0;
+        state.ballsLeft = CONFIG.TOTAL_BALLS;
+    } else {
+        state.ballsLeft += 20;
+    }
+    
+    state.activeBalls = [];
+    state.particles = [];
+    state.floatingTexts = [];
+    state.shockwaves = [];
+    state.combo = 0;
+    
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('hud').style.display = 'flex';
+    document.getElementById('level-display').textContent = level === 6 ? '无限猫咪' : `第 ${state.level} 关`;
+    if (level === 1) showTutorial(); else hideTutorial();
+    
+    createLevel(state.level);
+    prepareBall();
+    updateUI();
+}
+
+function createLevel(level) {
+    state.targets = [];
+    state.bumpers = [];
+    state.spinners = [];
+    
+    const midX = state.width / 2;
+    const scene = state.layout;
+
+    // --- 第 1 关 ---
+    if (level === 1) {
+        const cols = 8;
+        const rows = Math.min(8, Math.max(4, Math.floor((scene.bottom - scene.top - 48) / 36) + 1));
+        const margin = Math.min(30, state.width * 0.08);
+        const spacingX = (state.width - margin * 2) / (cols - 1);
+        const spacingY = Math.min(45, (scene.bottom - scene.top - 48) / (rows - 1));
+        const lastRowY = scene.top + (rows - 1) * spacingY;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (Math.random() < 0.2) continue;
+                createCat(margin + c * spacingX, scene.top + r * spacingY, { r: state.height < 650 ? 12 : CONFIG.CAT_RADIUS });
+            }
+        }
+        state.bumpers.push({ x: midX, y: Math.min(scene.bottom, lastRowY + 47), r: 20 });
+        const sideY = scene.top + (lastRowY - scene.top) * 0.82;
+        state.bumpers.push({ x: 40, y: sideY, r: 15 });
+        state.bumpers.push({ x: state.width - 40, y: sideY, r: 15 });
+    }
+    
+    // --- 第 2 关 ---
+    else if (level === 2) {
+        const radius = Math.min(160, state.width * 0.41, (scene.bottom - scene.top) * 0.46);
+        const ringY = (scene.top + scene.bottom) / 2;
+        const count = 18;
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 / count) * i;
+            createCat(midX + Math.cos(angle) * radius, ringY + Math.sin(angle) * radius);
+        }
+        createCat(midX - 40, ringY);
+        createCat(midX + 40, ringY);
+        createCat(midX, ringY - 50);
+        createCat(midX, ringY + 50);
+        state.spinners.push({ x: midX, y: ringY, angle: 0, speed: 0.05, radius: 15, armLength: Math.min(110, radius * 0.7), balls: 5 });
+        state.bumpers.push({ x: state.width * 0.2, y: scene.bottom - 10, r: 20 });
+        state.bumpers.push({ x: state.width * 0.8, y: scene.bottom - 10, r: 20 });
+    }
+    
+    // --- 第 3 关 ---
+    else if (level === 3) {
+        const y = value => fitLevelY(value, 120, 400);
+        const wallY = y(320);
+        const gapSize = 70; 
+        for (let x = 30; x < midX - gapSize/2; x += 25) state.bumpers.push({ x: x, y: wallY, r: 10 });
+        for (let x = midX + gapSize/2; x < state.width - 30; x += 25) state.bumpers.push({ x: x, y: wallY, r: 10 });
+        for (let r = 0; r < 4; r++) { for (let c = 0; c < 6; c++) createCat(midX + (c-2.5)*45, y(120 + r*45)); }
+        createCat(midX - 120, y(400));
+        createCat(midX + 120, y(400));
+        createCat(midX, y(400));
+        state.bumpers.push({ x: 0, y: y(200), r: 25 }); 
+        state.bumpers.push({ x: state.width, y: y(200), r: 25 }); 
+    }
+    
+    // --- 第 4 关 ---
+    else if (level === 4) {
+        const y = value => fitLevelY(value, 140, 600);
+        const rows = Math.min(7, Math.max(4, Math.floor((scene.bottom - scene.top - 32) / 36) + 1));
+        const rowSpacing = Math.min(55, (scene.bottom - scene.top - 32) / (rows - 1));
+        for (let r = 0; r < rows; r++) {
+            const speed = 1.5 + Math.random(); 
+            const direction = r % 2 === 0 ? 1 : -1;
+            const rowY = scene.top + r * rowSpacing;
+            for (let c = 0; c < 5; c++) {
+                const x = 35 + c * (state.width - 70) / 4;
+                createCat(x, rowY, { moveType: 'linear', vx: speed * direction, swingRange: 0 });
+            }
+        }
+        state.bumpers.push({ x: 60, y: y(220), r: 18, vx: 4, patrolMin: 40, patrolMax: state.width - 40 });
+        state.bumpers.push({ x: state.width - 60, y: y(330), r: 18, vx: -3, patrolMin: 40, patrolMax: state.width - 40 });
+        state.bumpers.push({ x: midX, y: y(440), r: 20, vx: 5, patrolMin: 40, patrolMax: state.width - 40 });
+        state.bumpers.push({ x: midX - 80, y: y(550), r: 22, vx: 2, patrolMin: 60, patrolMax: state.width - 60 });
+        state.bumpers.push({ x: midX + 80, y: y(600), r: 22, vx: -2, patrolMin: 60, patrolMax: state.width - 60 });
+        state.bumpers.push({ x: 20, y: scene.bottom - 10, r: 15 });
+        state.bumpers.push({ x: state.width - 20, y: scene.bottom - 10, r: 15 });
+    }
+
+    // --- 第 5 关 ---
+    else if (level === 5) {
+        const bossX = midX;
+        const orbitR = Math.min(130, state.width * 0.38, (scene.bottom - scene.top - 12) / 2);
+        const bumperR = Math.min(state.width * 0.42, (scene.bottom - scene.top - 10) / 2, 220);
+        const bossY = Math.max(scene.top + orbitR - 10, scene.top + bumperR - 10, Math.min(280, scene.bottom - orbitR - 10));
+        state.targets.push({
+            x: bossX, y: bossY, baseX: bossX, baseY: bossY, r: Math.min(70, state.width * 0.2), hp: 50, maxHp: 50, 
+            variant: { id: 'boss', name: '猫王', color: '#f1c40f', ears: '#f39c12', face: '#f39c12', eyes: '#c0392b' },
+            isDead: false, vx: 0, vy: 0, rotation: 0, rotSpeed: 0, hitFlash: 0, expressionTimer: 0, offsetY: 0, offsetX: 0,
+            moveType: 'boss_hover', phase: 0, swingSpeed: 1.5, swingRange: 15
+        });
+        const guardCount = 8;
+        for (let i = 0; i < guardCount; i++) {
+            const angle = (Math.PI * 2 / guardCount) * i;
+            state.targets.push({
+                x: 0, y: 0, baseX: bossX, baseY: bossY, r: 18, hp: 5, maxHp: 5, 
+                variant: CAT_TYPES[4], isDead: false, vx: 0, vy: 0, rotation: 0, rotSpeed: 0,
+                hitFlash: 0, expressionTimer: 0, offsetY: 0, offsetX: 0, moveType: 'orbit', 
+                orbitR, orbitAngle: angle, orbitSpeed: 0.02
+            });
+        }
+        const bumperCount = 12;
+        const angleOffset = (Math.PI * 2 / bumperCount) / 2; 
+        for (let i = 0; i < bumperCount; i++) {
+            const angle = (Math.PI * 2 / bumperCount) * i + angleOffset;
+            state.bumpers.push({ x: bossX + Math.cos(angle) * bumperR, y: bossY + Math.sin(angle) * bumperR, r: 18 });
+        }
+    }
+
+    // --- 第 6 关 ---
+    else if (level === 6) {
+        const arenaX = midX;
+        const arenaR = Math.min(state.width * 0.45, (scene.bottom - scene.top - 12) / 2, 280);
+        const arenaY = Math.max(scene.top + arenaR, Math.min(320, scene.bottom - arenaR));
+        
+        const wallCount = 24;
+        for (let i = 0; i < wallCount; i++) {
+            const angle = (Math.PI * 2 / wallCount) * i;
+            if (Math.abs(angle - Math.PI/2) < 0.5) continue; // 底部开口
+
+            state.bumpers.push({
+                x: arenaX + Math.cos(angle) * arenaR,
+                y: arenaY + Math.sin(angle) * arenaR,
+                r: 15,
+                color: '#ff6b81' 
+            });
+        }
+
+        const gateAngleOffset = 0.35; 
+        state.bumpers.push({
+            x: arenaX + Math.cos(Math.PI/2 - gateAngleOffset) * arenaR,
+            y: arenaY + Math.sin(Math.PI/2 - gateAngleOffset) * arenaR,
+            r: 12,
+            color: '#ff6b81'
+        });
+        state.bumpers.push({
+            x: arenaX + Math.cos(Math.PI/2 + gateAngleOffset) * arenaR,
+            y: arenaY + Math.sin(Math.PI/2 + gateAngleOffset) * arenaR,
+            r: 12,
+            color: '#ff6b81'
+        });
+        
+        const layers = scene.bottom - scene.top < 400 ? 3 : 5;
+        for (let l = 1; l <= layers; l++) {
+            const layerR = (arenaR - 40) * (l / layers);
+            const count = l * (state.height < 560 ? 4 : 6);
+            for (let k = 0; k < count; k++) {
+                const angle = (Math.PI * 2 / count) * k + (l % 2) * 0.5; 
+                const x = arenaX + Math.cos(angle) * layerR;
+                const y = arenaY + Math.sin(angle) * layerR;
+                createCat(x, y, { r: state.height < 560 ? 8 : 10, swingRange: 3 });
+            }
+        }
+        
+        state.arena = { x: arenaX, y: arenaY, r: arenaR - 40 };
+    }
+}
+
+function createCat(x, y, options = {}) {
+    const typeIndex = Math.floor(Math.random() * CAT_TYPES.length);
+    state.targets.push({
+        x, y, baseX: x, 
+        r: state.height < 560 ? 11 : CONFIG.CAT_RADIUS,
+        hp: CONFIG.CAT_HP_MAX, maxHp: CONFIG.CAT_HP_MAX,
+        variant: CAT_TYPES[typeIndex],
+        isDead: false, vx: 0, vy: 0, rotation: 0, rotSpeed: 0,
+        hitFlash: 0, expressionTimer: 0, offsetY: 0, offsetX: 0,
+        phase: Math.random() * Math.PI * 2,
+        swingRange: 8, swingSpeed: 2,
+        moveType: 'bob', 
+        ...options 
+    });
+}
+
+function prepareBall() {
+    if (state.level !== 6 && state.ballsLeft <= 0) return;
+    const hue = Math.floor(Math.random() * 360);
+    const r = state.level === 6 ? 7 : CONFIG.HAMSTER_RADIUS;
+    
+    state.readyBall = {
+        x: state.width / 2, y: state.layout.launchY,
+        vx: 0, vy: 0, r: r, rotation: 0,
+        color: `hsl(${hue}, 85%, 65%)`, earColor: `hsl(${hue}, 85%, 55%)`
+    };
+}
+
+function onDown(e) {
+    if (state.isLandscape || state.status !== 'RUNNING' || !state.readyBall) return;
+    const rect = canvas.getBoundingClientRect();
+    const px = (e.clientX - rect.left);
+    const py = (e.clientY - rect.top);
+    if (Math.hypot(px - state.readyBall.x, py - state.readyBall.y) < Math.min(90, state.width * 0.23)) {
+        state.dragStart = { x: state.readyBall.x, y: state.readyBall.y };
+        state.dragCurrent = { x: px, y: py };
+        canvas.setPointerCapture(e.pointerId);
+    }
+}
+
+function onMove(e) {
+    if (state.dragStart) {
+        const rect = canvas.getBoundingClientRect();
+        state.dragCurrent = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+}
+
+function onUp() {
+    if (state.dragStart && state.readyBall) {
+        const dx = state.dragStart.x - state.dragCurrent.x;
+        const dy = state.dragStart.y - state.dragCurrent.y;
+        if (Math.hypot(dx, dy) > 10) {
+            const force = Math.min(Math.hypot(dx, dy), CONFIG.MAX_DRAG) * CONFIG.LAUNCH_MULTIPLIER;
+            const angle = Math.atan2(dy, dx);
+            state.readyBall.vx = Math.cos(angle) * force;
+            state.readyBall.vy = Math.sin(angle) * force;
+            state.activeBalls.push(state.readyBall);
+            state.readyBall = null;
+            if (state.level !== 6) state.ballsLeft--;
+            AudioSys.play('launch', 0.15);
+            updateUI();
+            setTimeout(prepareBall, CONFIG.RELOAD_TIME);
+            if (state.level === 1) hideTutorial();
+        }
+        state.dragStart = null;
+        state.dragCurrent = null;
+    }
+}
+
+function cancelDrag() {
+    state.dragStart = null;
+    state.dragCurrent = null;
+}
+
+function update() {
+    if (state.hitStop > 0) { state.hitStop--; return; }
+    const now = Date.now();
+
+    state.spinners.forEach(s => {
+        s.angle += s.speed;
+    });
+    
+    state.bumpers.forEach(b => {
+        if (b.vx) {
+            b.x += b.vx;
+            if (b.x < b.patrolMin || b.x > b.patrolMax) {
+                b.vx *= -1;
+                b.x = Math.max(b.patrolMin, Math.min(b.x, b.patrolMax)); 
+            }
+        }
+    });
+
+    for (let i = state.activeBalls.length - 1; i >= 0; i--) {
+        const b = state.activeBalls[i];
+        b.vy += CONFIG.GRAVITY;
+        b.vx *= CONFIG.FRICTION; b.vy *= CONFIG.FRICTION;
+        b.x += b.vx; b.y += b.vy; b.rotation += b.vx * 0.1;
+
+        if (b.x < b.r || b.x > state.width - b.r) { b.vx *= -CONFIG.WALL_BOUNCE; b.x = b.x < b.r ? b.r : state.width - b.r; }
+        if (b.y < b.r) { b.vy *= -CONFIG.WALL_BOUNCE; b.y = b.r; }
+        if (b.y > state.height + 50) {
+            state.activeBalls.splice(i, 1);
+            if (state.ballsLeft <= 0 && state.activeBalls.length === 0 && !state.isEnding) endGame(false);
+            continue;
+        }
+        checkCollisions(b);
+    }
+
+    let aliveCount = 0;
+    
+    if (state.level === 6 && state.arena) {
+        const currentTargets = state.targets.filter(t => !t.isDead).length;
+        if (currentTargets < 15) {
+            for(let k=0; k<3; k++) {
+                const r = Math.random() * state.arena.r;
+                const theta = Math.random() * Math.PI * 2;
+                const x = state.arena.x + Math.cos(theta) * r;
+                const y = state.arena.y + Math.sin(theta) * r;
+                createCat(x, y, { r: 10, swingRange: 2, animScale: 0 });
+            }
+        }
+    }
+
+    for (let i = state.targets.length - 1; i >= 0; i--) {
+        const t = state.targets[i];
+        if (t.isDead) {
+            t.x += t.vx; t.y += t.vy; t.vy += 0.5; t.rotation += t.rotSpeed;
+            if (t.y > state.height + 100 || t.x < -100 || t.x > state.width + 100) state.targets.splice(i, 1);
+        } else {
+            aliveCount++;
+            
+            if (t.animScale !== undefined && t.animScale < 1) {
+                t.animScale += 0.1;
+            }
+
+            if (t.moveType === 'linear') {
+                t.x += t.vx;
+                if (t.x < t.r + 10 || t.x > state.width - t.r - 10) { t.vx *= -1; t.x = Math.max(t.r + 10, Math.min(t.x, state.width - t.r - 10)); }
+                t.offsetY *= 0.85; t.offsetX *= 0.85;
+                t.y = (t.baseY || t.y) + t.offsetY; if(!t.baseY) t.baseY = t.y;
+            } else if (t.moveType === 'boss_hover') {
+                let hoverY = Math.sin(now/1000 * t.swingSpeed + t.phase) * t.swingRange;
+                t.offsetY *= 0.9; t.offsetX *= 0.9;
+                t.x = t.baseX + t.offsetX; t.y = t.baseY + hoverY + t.offsetY;
+            } else if (t.moveType === 'orbit') {
+                t.orbitAngle += t.orbitSpeed;
+                t.offsetY *= 0.85; t.offsetX *= 0.85;
+                t.x = t.baseX + Math.cos(t.orbitAngle) * t.orbitR + t.offsetX;
+                t.y = t.baseY + Math.sin(t.orbitAngle) * t.orbitR + t.offsetY;
+            } else {
+                let baseX = t.baseX + Math.sin(now/1000 * t.swingSpeed + t.phase) * t.swingRange;
+                t.offsetY *= 0.85; t.offsetX *= 0.85;
+                t.x = baseX + t.offsetX; t.y = (t.baseY || t.y) + t.offsetY; 
+                if(!t.baseY) t.baseY = t.y; 
+            }
+
+            if (t.hitFlash > 0) t.hitFlash -= 0.15;
+            if (t.expressionTimer > 0) t.expressionTimer--;
+        }
+    }
+
+    if (state.level !== 6 && aliveCount === 0 && state.status === 'RUNNING' && !state.isEnding) {
+        state.isEnding = true;
+        setTimeout(() => endGame(true), 1000);
+    }
+
+    state.particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life -= 0.025; if (p.life <= 0) state.particles.splice(i, 1); });
+    state.shockwaves.forEach((s, i) => { s.r += 3; s.alpha -= 0.06; if(s.alpha <= 0) state.shockwaves.splice(i, 1); });
+    state.floatingTexts.forEach((t, i) => { t.y -= 2; t.scale = Math.max(0, t.scale - 0.015); t.life -= 0.02; if (t.life <= 0) state.floatingTexts.splice(i, 1); });
+    if (state.shake > 0) state.shake *= 0.8;
+    if (state.comboTimer && now - state.comboTimer > CONFIG.COMBO_TIMEOUT) { state.combo = 0; document.getElementById('combo-badge').style.opacity = '0'; }
+}
+
+function checkCollisions(b) {
+    const incomingVx = b.vx; const incomingVy = b.vy;
+    const speed = Math.hypot(b.vx, b.vy);
+
+    state.targets.forEach(t => {
+        if (t.isDead) return;
+        const dist = Math.hypot(b.x - t.x, b.y - t.y);
+        if (dist < b.r + t.r) {
+            const angle = Math.atan2(b.y - t.y, b.x - t.x);
+            b.vx = Math.cos(angle) * 12; b.vy = Math.sin(angle) * 12;
+            t.hp--; t.hitFlash = 1.0; t.expressionTimer = 30;
+            const normVx = incomingVx / (speed || 1); const normVy = incomingVy / (speed || 1);
+            t.offsetX = normVx * 8; t.offsetY = normVy * 8;
+            state.hitStop = 4; state.shake = 8;
+            if (state.level === 6) state.shake = 12; 
+            
+            state.shockwaves.push({x: (b.x+t.x)/2, y: (b.y+t.y)/2, r: 10, alpha: 1, color: 'white'});
+            addScore(t.x, t.y, t.hp <= 0);
+            
+            let colors = [t.variant.color, '#fff', '#000'];
+            const pColor = colors[Math.floor(Math.random()*colors.length)];
+            createParticles(t.x, t.y, t.hp <= 0 ? pColor : '#fff', t.hp <= 0 ? 15 : 5);
+            AudioSys.play('hit', 0.05);
+
+            if (t.hp <= 0) {
+                t.isDead = true; state.shake = 25;
+                const impactAngle = Math.atan2(incomingVy, incomingVx);
+                const randomSpread = (Math.random() - 0.5) * 0.5;
+                const finalFlyDir = impactAngle + randomSpread;
+                const flyForce = 20 + Math.random() * 10;
+                t.vx = Math.cos(finalFlyDir) * flyForce;
+                t.vy = Math.sin(finalFlyDir) * flyForce;
+                t.rotSpeed = (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.5);
+                AudioSys.play('flyout', 0.2);
+            }
+        }
+    });
+
+    state.bumpers.forEach(bmp => {
+        const dist = Math.hypot(b.x - bmp.x, b.y - bmp.y);
+        if (dist < b.r + bmp.r) {
+            const angle = Math.atan2(b.y - bmp.y, b.x - bmp.x);
+            b.vx = Math.cos(angle) * 18; b.vy = Math.sin(angle) * 18;
+            state.shake = 5;
+            state.shockwaves.push({x: bmp.x, y: bmp.y, r: bmp.r, alpha: 0.8, color: CONFIG.COLORS.BUMPER});
+            AudioSys.play('hit', 0.03);
+            createParticles(bmp.x, bmp.y, CONFIG.COLORS.BUMPER, 8);
+        }
+    });
+
+    state.spinners.forEach(s => {
+        for (let j = 0; j < 2; j++) { 
+            for (let k = 1; k <= s.balls; k++) {
+                const distFromCenter = k * (s.armLength / s.balls);
+                const currentAngle = s.angle + (j * Math.PI); 
+                const bx = s.x + Math.cos(currentAngle) * distFromCenter;
+                const by = s.y + Math.sin(currentAngle) * distFromCenter;
+                
+                const dist = Math.hypot(b.x - bx, b.y - by);
+                if (dist < b.r + s.radius) {
+                    const angle = Math.atan2(b.y - by, b.x - bx);
+                    const tipSpeed = s.speed * distFromCenter * 1.5; 
+                    b.vx = Math.cos(angle) * 15 + Math.cos(currentAngle + Math.PI/2) * tipSpeed;
+                    b.vy = Math.sin(angle) * 15 + Math.sin(currentAngle + Math.PI/2) * tipSpeed;
+                    state.shake = 6;
+                    AudioSys.play('hit', 0.05);
+                    createParticles(bx, by, '#ff4757', 3);
+                    return; 
+                }
+            }
+        }
+    });
+}
+
+function addScore(x, y, isKill) {
+    state.combo++;
+    state.comboTimer = Date.now();
+    const base = isKill ? CONFIG.SCORE_KILL : CONFIG.SCORE_HIT; 
+    const comboIndex = Math.min(state.combo - 1, CONFIG.SCORE_COMBO_MAX);
+    const comboMult = 1 + comboIndex * CONFIG.SCORE_COMBO_STEP;
+    const pts = Math.round(base * comboMult);
+    state.score += pts;
+    updateUI();
+    const cb = document.getElementById('combo-badge');
+    cb.style.opacity = '1';
+    cb.style.transform = `scale(${1 + Math.min(state.combo * 0.1, 1)}) rotate(${(Math.random()-0.5)*20}deg)`;
+    cb.textContent = `碰碰 x${state.combo}`;
+    state.floatingTexts.push({ x, y, text: `+${pts}`, life: 1, scale: 1 });
+}
+
+function createParticles(x, y, color, count) {
+    for (let i = 0; i < count; i++) {
+        state.particles.push({
+            x, y, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, life: 1, color
+        });
+    }
+}
+
+function updateUI() {
+    document.getElementById('score-display').textContent = state.score;
+    document.getElementById('balls-text').textContent = state.level === 6 ? '∞' : state.ballsLeft;
+}
+
+function endGame(isWin) {
+    state.status = 'ENDED';
+    hideTutorial();
+    document.getElementById('hud').style.display = 'none';
+    const screen = document.getElementById('end-screen');
+    const title = document.getElementById('end-title');
+    const msg = document.getElementById('end-message');
+    const nextBtn = document.getElementById('next-level-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    
+    screen.classList.add('active');
+    document.getElementById('final-score').textContent = state.score;
+    
+    if (isWin) {
+        AudioSys.play('win');
+        title.textContent = `第 ${state.level} 关通过!`;
+        title.style.background = "linear-gradient(135deg, #f1c40f, #2ecc71)";
+        title.style.webkitBackgroundClip = "text";
+        title.style.webkitTextFillColor = "transparent";
+        
+        const bonus = state.ballsLeft * CONFIG.SCORE_BONUS_PER_BALL;
+        state.score += bonus;
+        msg.textContent = `剩余仓鼠奖励 +${bonus}`;
+        msg.style.display = "block";
+        document.getElementById('final-score').textContent = state.score;
+        
+        // 进度保存逻辑
+        if (state.level >= state.maxUnlockedLevel && state.level < state.maxLevels) {
+            state.maxUnlockedLevel = state.level + 1;
+            try { localStorage.setItem('hamster_pinball_level', String(state.maxUnlockedLevel)); } catch { /* Session progress remains in state. */ }
+            document.getElementById('start-btn').textContent = `继续第 ${state.maxUnlockedLevel} 关`;
+        }
+        
+        if (state.level < state.maxLevels) {
+            nextBtn.style.display = "inline-block";
+            retryBtn.style.display = "none";
+        } else {
+            // 通关所有
+            title.textContent = "全通关！你太强了！";
+            nextBtn.style.display = "none";
+            retryBtn.style.display = "inline-block";
+            retryBtn.textContent = "重玩最后一关";
+        }
+        
+    } else {
+        title.textContent = "挑战失败";
+        title.style.background = "linear-gradient(135deg, #ff9f43, #ff6b81)";
+        title.style.webkitBackgroundClip = "text";
+        title.style.webkitTextFillColor = "transparent";
+        msg.style.display = "none";
+        
+        nextBtn.style.display = "none";
+        retryBtn.style.display = "inline-block";
+        retryBtn.textContent = "重试本关";
+    }
+}
+
+function render() {
+    ctx.clearRect(0, 0, state.width, state.height);
+    ctx.save();
+    if (state.shake > 0) {
+        const dx = (Math.random()-0.5) * state.shake;
+        const dy = (Math.random()-0.5) * state.shake;
+        ctx.translate(dx, dy); ctx.rotate((Math.random()-0.5) * state.shake * 0.002);
+    }
+
+    if (state.dragStart && state.dragCurrent && state.readyBall) {
+        const dx = state.dragStart.x - state.dragCurrent.x;
+        const dy = state.dragStart.y - state.dragCurrent.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 10) {
+            const angle = Math.atan2(dy, dx);
+            const lineLen = Math.min(dist * 3, 400); 
+            const dragPercent = Math.min(dist / CONFIG.MAX_DRAG, 1);
+            
+            ctx.save();
+            ctx.beginPath(); ctx.moveTo(state.readyBall.x, state.readyBall.y); ctx.lineTo(state.dragCurrent.x, state.dragCurrent.y);
+            ctx.strokeStyle = state.readyBall.color; ctx.lineWidth = 2 + dragPercent * 5; ctx.lineCap = 'round'; ctx.globalAlpha = 0.8; ctx.stroke();
+            ctx.fillStyle = "#ff6b81"; ctx.beginPath(); ctx.arc(state.dragCurrent.x, state.dragCurrent.y, 6, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+            ctx.save(); ctx.beginPath(); ctx.setLineDash([10, 8]); ctx.strokeStyle = "rgba(255,255,255,0.6)"; ctx.lineWidth = 4;
+            ctx.moveTo(state.readyBall.x, state.readyBall.y); ctx.lineTo(state.readyBall.x + Math.cos(angle) * lineLen, state.readyBall.y + Math.sin(angle) * lineLen); ctx.stroke();
+            ctx.fillStyle = state.readyBall.color; ctx.beginPath(); ctx.arc(state.readyBall.x + Math.cos(angle) * lineLen, state.readyBall.y + Math.sin(angle) * lineLen, 5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        }
+    }
+
+    state.shockwaves.forEach(s => {
+        ctx.save(); ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.strokeStyle = s.color; ctx.lineWidth = 4; ctx.globalAlpha = s.alpha; ctx.stroke(); ctx.restore();
+    });
+
+    state.targets.forEach(t => {
+        ctx.save(); ctx.translate(t.x, t.y);
+        if (t.isDead) ctx.rotate(t.rotation);
+        if (t.hitFlash > 0.3) {
+            ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(0, 0, t.r * 1.3, 0, Math.PI*2); ctx.fill();
+        } else {
+            const v = t.variant;
+            ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.beginPath(); ctx.arc(0, 0, t.r, 0, Math.PI*2); ctx.stroke();
+            ctx.fillStyle = v.ears; ctx.beginPath(); ctx.moveTo(-t.r*0.7, -t.r*0.4); ctx.lineTo(-t.r*1.2, -t.r*1.5); ctx.lineTo(0, -t.r*0.8); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(t.r*0.7, -t.r*0.4); ctx.lineTo(t.r*1.2, -t.r*1.5); ctx.lineTo(0, -t.r*0.8); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = v.color; ctx.beginPath(); ctx.arc(0, 0, t.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            if (v.id === 'calico') { ctx.fillStyle = v.patch1; ctx.beginPath(); ctx.arc(-t.r*0.4, t.r*0.3, t.r*0.35, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = v.patch2; ctx.beginPath(); ctx.arc(t.r*0.5, -t.r*0.2, t.r*0.3, 0, Math.PI*2); ctx.fill(); }
+            else if (v.id === 'tabby' || v.id === 'orange') { ctx.fillStyle = v.stripes; ctx.beginPath(); ctx.rect(-t.r*0.6, -t.r*0.8, t.r*1.2, 4); ctx.fill(); ctx.beginPath(); ctx.rect(-t.r*0.5, -t.r*0.5, t.r, 3); ctx.fill(); }
+            else if (v.id === 'siamese') { ctx.fillStyle = v.face; ctx.beginPath(); ctx.arc(0, 0, t.r*0.6, 0, Math.PI*2); ctx.fill(); }
+            ctx.fillStyle = v.eyes || "#2f3542"; if (v.id === 'black') ctx.fillStyle = v.eyes; 
+            ctx.strokeStyle = "#2f3542"; ctx.lineWidth = 2;
+            if (t.expressionTimer > 0 || t.isDead) { 
+                ctx.beginPath(); ctx.moveTo(-8, -2); ctx.lineTo(-4, 2); ctx.lineTo(-8, 6); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(8, -2); ctx.lineTo(4, 2); ctx.lineTo(8, 6); ctx.stroke();
+                ctx.beginPath(); ctx.arc(0, 5, 3, 0, Math.PI*2); ctx.fillStyle = '#ff6b81'; ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.arc(-t.r*0.3, -t.r*0.2, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(t.r*0.3, -t.r*0.2, 2.5, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = v.nose || "#ffcccc"; ctx.beginPath(); ctx.arc(0, 2, 2, 0, Math.PI*2); ctx.fill();
+            }
+        }
+        ctx.restore();
+    });
+
+    state.spinners.forEach(s => {
+        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.angle);
+        for(let j=0; j<2; j++) {
+            ctx.rotate(Math.PI);
+            for(let k=1; k<=s.balls; k++) {
+                const d = k * (s.armLength / s.balls);
+                ctx.beginPath(); ctx.arc(d, 0, s.radius, 0, Math.PI*2);
+                ctx.fillStyle = '#ff4757'; ctx.fill();
+                ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+            }
+        }
+        ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI*2); ctx.fillStyle = '#2f3542'; ctx.fill();
+        ctx.strokeStyle = 'white'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.restore();
+    });
+
+    state.bumpers.forEach(b => {
+        const color = b.color || CONFIG.COLORS.BUMPER;
+        ctx.shadowBlur = 20; ctx.shadowColor = color;
+        ctx.fillStyle = color; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 0.7, 0, Math.PI*2); ctx.stroke();
+    });
+
+    const drawHam = (h) => {
+        ctx.save(); ctx.translate(h.x, h.y); ctx.rotate(h.rotation);
+        ctx.fillStyle = h.earColor; ctx.beginPath(); ctx.arc(-h.r*0.8, -h.r*0.8, h.r*0.5, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(h.r*0.8, -h.r*0.8, h.r*0.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = h.color; ctx.beginPath(); ctx.arc(0, 0, h.r, 0, Math.PI*2); ctx.fill();
+        ctx.shadowColor = "rgba(0,0,0,0.2)"; ctx.shadowBlur = 5;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; ctx.beginPath(); ctx.arc(-h.r*0.5, 2, 3, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(h.r*0.5, 2, 3, 0, Math.PI*2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(-3, -2, 2.5, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(3, -2, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(-3, -2, 1.2, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(3, -2, 1.2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+    };
+    if (state.readyBall) drawHam(state.readyBall);
+    state.activeBalls.forEach(drawHam);
+
+    state.particles.forEach(p => { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.beginPath(); ctx.rect(p.x, p.y, 5, 5); ctx.fill(); });
+    ctx.globalAlpha = 1;
+    state.floatingTexts.forEach(t => { ctx.globalAlpha = t.life; ctx.fillStyle = '#ffffff'; ctx.font = `900 ${22 * t.scale}px var(--ui-font)`; ctx.textAlign = 'center'; ctx.shadowColor = "black"; ctx.shadowBlur = 2; ctx.fillText(t.text, t.x, t.y); ctx.shadowBlur = 0; });
+
+    ctx.restore();
+}
+
+function loop() {
+    if (!state.isLandscape) {
+        if (state.status === 'RUNNING') update();
+        render();
+    }
+    requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

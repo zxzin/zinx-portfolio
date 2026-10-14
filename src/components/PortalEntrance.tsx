@@ -43,11 +43,13 @@ export default function PortalEntrance() {
     return () => clearTimeout(timeout);
   }, [ready, state.fallback, exhibition, fail]);
   const replay = () => { if (state.fallback) setReady(false); restart(); };
+  const changeOutfit = () => { setChosenOutfit(outfits[(outfits.indexOf(outfit) + 1) % outfits.length]); pulse(480); };
   return <div className="arcade-experience" ref={stage} data-input-mode={state.inputMode} data-phase={state.phase} data-shakes={state.shakes} data-render={state.fallback ? "static" : "webgl"} data-ready={ready} data-audio={status} data-bgm={bgmStatus}>
     <a className="skip-link" href="#hub" onClick={event => { event.preventDefault(); direct(); }}>直接浏览作品</a>
     <div className="arcade-world" aria-hidden={exhibition || undefined}>
       {!state.fallback && <SceneBoundary onError={fail}>
-        <Suspense fallback={null}><PortalScene state={state} motion={motion} onReady={onReady} onFailure={fail} onPull={pull} onDragLever={dragLever} onReleaseLever={releaseLever} /></Suspense>
+        <Suspense fallback={null}><PortalScene state={state} motion={motion} onReady={onReady} onFailure={fail} onPull={pull} onDragLever={dragLever} onReleaseLever={releaseLever}
+          outfit={outfit} onOutfit={changeOutfit} onCompanion={() => pulse(660, .12)} /></Suspense>
       </SceneBoundary>}
     </div>
     {!exhibition && <div className="arcade-shade" aria-hidden="true" />}
@@ -66,11 +68,11 @@ export default function PortalEntrance() {
     {!ready && !state.fallback && !exhibition && <div className="arcade-loading" role="status"><Pixels /><span>正在准备开场</span><button type="button" onClick={fail}>直接浏览</button></div>}
     {!exhibition && <p className="sr-only" role="status">{state.phase === "revealing" ? "红幕揭开，准备开场" : state.phase === "opening" ? "金币出场" : state.phase === "spinning" ? `第 ${state.shakes + 1} 轮转动中` : `已完成 ${state.shakes} 轮，共 3 轮。下拉红色拉杆，或按空格键继续。`}</p>}
     {exhibition && <ExhibitionWall pulse={pulse} onSection={onSection} onReplay={replay} />}
-    <aside className="exhibition-companion" aria-label="歪歪的陪伴" data-location={exhibition ? "wall" : "entrance"} data-crossing={state.inputMode === "travelling"}>
+    {exhibition && <aside className="exhibition-companion" aria-label="歪歪的陪伴" data-location="wall" data-crossing={state.inputMode === "travelling"}>
       <div className="companion-perch" aria-hidden="true" />
       <YYCompanion outfit={outfit} onInteract={() => pulse(660, .12)} />
-      <button className="companion-outfit" type="button" data-outfit={outfit} aria-label={"给 YY 换衣服，当前" + outfitNames[outfit]} onClick={() => { setChosenOutfit(outfits[(outfits.indexOf(outfit) + 1) % outfits.length]); pulse(480); }}>换一套 <span aria-hidden="true">↻</span></button>
-    </aside>
+      <button className="companion-outfit" type="button" data-outfit={outfit} aria-label={"给 YY 换衣服，当前" + outfitNames[outfit]} onClick={changeOutfit}>换一套 <span aria-hidden="true">↻</span></button>
+    </aside>}
     <footer className="arcade-footer">
       <span><i />{exhibition ? "ZINX / COIN COLLECTION" : "CREATIVE ARCADE"}</span>
       {exhibition && <button key="replay-opening" type="button" onClick={replay}>重玩开场 ↺</button>}

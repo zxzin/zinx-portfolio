@@ -9,7 +9,7 @@ import "../vendor/yy/dance.css";
 import "./YYCompanion.css";
 
 export type YYOutfit = "daily" | "scarf" | "hat";
-export function YYCompanion({ outfit = "daily", onInteract }: { outfit?: YYOutfit; onInteract?: () => void }) {
+export function YYCompanion({ outfit = "daily", onInteract, idleDance = true }: { outfit?: YYOutfit; onInteract?: () => void; idleDance?: boolean }) {
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<SVGGElement>(null);
   const timer = useRef(0);
@@ -20,7 +20,7 @@ export function YYCompanion({ outfit = "daily", onInteract }: { outfit?: YYOutfi
   const reduced = useReducedMotion();
   const gradient = `yy-body-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const svgPart = (source: string) => ({ __html: source.replaceAll("bodyGradient", gradient) });
-  const running = inView && pageVisible && !reduced;
+  const running = inView && pageVisible && !reduced && (idleDance || encore);
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting));

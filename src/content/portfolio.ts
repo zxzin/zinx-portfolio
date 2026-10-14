@@ -15,6 +15,7 @@ export type ProjectMedia = {
   kind: "image";
   src: string;
   alt: string;
+  title?: string;
   fit?: "contain" | "cover";
 };
 
@@ -412,27 +413,28 @@ export const portfolioProjects: PortfolioProject[] = [
     cn: "录屏小子",
     kind: "PRODUCT",
     status: "SHIPPED",
-    note: "native screen studio",
-    copy: "macOS 录屏与轻量编辑工具。用 HUD 控制区域、声音和摄像头，录完后进入工作台继续整理。",
+    note: "native screen recorder",
+    copy: "选好画面，带上声音和人像。用一条小面板完成 Mac 录屏，结束后自动保存 MP4。",
     evidence: "MACOS · SCREENCAPTUREKIT · APP STORE",
     accent: "blue",
-    tags: ["MACOS", "RECORDING", "EDITOR", "APP STORE"],
+    tags: ["macOS", "录屏", "人像浮窗", "Codex"],
     media: {
       kind: "image",
-      src: "/evidence/zinxcord-hud-real.png",
-      alt: "Zinxcord 正在运行的录屏 HUD",
+      src: "/projects/zinxcord/record-current.jpg",
+      title: "框好画面，开始录制",
+      alt: "录屏小子新版仓鼠图标、区域选择与录制面板",
     },
-    decision: "用紧凑的 HUD 控制录制，把剪辑与导出集中在工作台。",
+    decision: "把选区、声音和人像收进紧凑面板，录完直接保存。展示图由当前产品组件重新渲染，窗口、人像和文件名为演示素材。",
     gallery: [
       {
-        src: "/evidence/zinxcord-hud-real.png",
-        title: "录制 HUD",
-        copy: "录制区域、声音与摄像头控制集中在一条工具栏中。",
+        src: "/projects/zinxcord/camera-current.jpg",
+        title: "带上你的人像",
+        copy: "可移动、缩放的人像浮窗，提供美颜与背景虚化。像素角色为演示画面。",
       },
       {
-        src: "/evidence/zinxcord-workbench-real.png",
-        title: "导入素材",
-        copy: "从本地视频或已保存的录屏项目进入编辑，继续完成整理与导出。",
+        src: "/projects/zinxcord/save-current.jpg",
+        title: "录完，就存好",
+        copy: "结束录制后保存 MP4，一键打开所在文件夹。文件名为演示内容。",
       },
     ],
     links: [

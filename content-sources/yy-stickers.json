@@ -1,0 +1,162 @@
+{
+  "sourceProject": "桌面宠物/pet-yy-mvp/promo/yy-stickers-workplace-quick-replies-20260820",
+  "authority": "review/final-inventory-20260930.json",
+  "acceptedAt": "2026-09-30",
+  "adaptation": "14 original accepted GIFs copied byte-for-byte. Posters decoded at the recorded preview frame; no recoloring, cropping or retiming. Item 15 is pending and excluded.",
+  "items": [
+    {
+      "number": 1,
+      "name": "收到",
+      "source": "final/current-14-20260930/gif/01_收到.gif",
+      "asset": "/projects/yy-stickers/01.gif",
+      "sha256": "70aac8b811df2a02d45a4fbeb1bcc737204e3b3630002642395a32611d04c6f5",
+      "frames": 49,
+      "durationMs": 3040,
+      "previewFrame": 34,
+      "posterSha256": "ac53a6d20f937f8d66f6a4abc21d4c2b7cb4e6ee8ff5256c21424fb16c173b1b"
+    },
+    {
+      "number": 2,
+      "name": "无字赶工",
+      "source": "final/current-14-20260930/gif/02_无字赶工.gif",
+      "asset": "/projects/yy-stickers/02.gif",
+      "sha256": "71ec604bd045ac6de7acd623ab3de0b0fa7187030b7bed9a62d61d73de1cb35a",
+      "frames": 38,
+      "durationMs": 1520,
+      "previewFrame": 16,
+      "posterSha256": "19a6a54490837949659d38d30694fc34ac80ac4d552d322cbab9568d3be415f3"
+    },
+    {
+      "number": 3,
+      "name": "疲惫关电脑",
+      "source": "final/current-14-20260930/gif/03_疲惫关电脑.gif",
+      "asset": "/projects/yy-stickers/03.gif",
+      "sha256": "e6e8e9718220ed7e92ed5ac7c1964dc8781e27a1c6b7b5c42015daaae6e1feb3",
+      "frames": 71,
+      "durationMs": 2840,
+      "previewFrame": 17,
+      "posterSha256": "735e4493d31475ec827ade6c685cfaf6a1e80a22ce3a2000bbf239c655ad90c3"
+    },
+    {
+      "number": 4,
+      "name": "泳池等AI",
+      "source": "final/current-14-20260930/gif/04_泳池等AI.gif",
+      "asset": "/projects/yy-stickers/04.gif",
+      "sha256": "97b9d78b7f670077edf2ce42b80cc3d5727467bccbfb9d695cd1ab7e9fe51053",
+      "frames": 52,
+      "durationMs": 3120,
+      "previewFrame": 24,
+      "posterSha256": "cb33e7ade916d0d410f0bc2b81b8acdcc598948adc68484afaa01b5afc414de1"
+    },
+    {
+      "number": 5,
+      "name": "流泪淹没自己",
+      "source": "final/current-14-20260930/gif/05_流泪淹没自己.gif",
+      "asset": "/projects/yy-stickers/05.gif",
+      "sha256": "77fca29afa1a72f886ad588ce50378fcc2e14b9bdf3e01171aff0e131d2db60a",
+      "frames": 74,
+      "durationMs": 2960,
+      "previewFrame": 19,
+      "posterSha256": "b2af673922467bcc41fb86f4251bb080e216ede4b7088a6689ea31e522cf6a97"
+    },
+    {
+      "number": 6,
+      "name": "委屈哭",
+      "source": "final/current-14-20260930/gif/06_委屈哭.gif",
+      "asset": "/projects/yy-stickers/06.gif",
+      "sha256": "a8a93b5254632ea81693b13abbf751fb5e3e7bcb32f6ecfe538dd98b9bf97bc7",
+      "frames": 64,
+      "durationMs": 2880,
+      "previewFrame": 27,
+      "posterSha256": "64feec3ebe76ec24bfb7af546a32a097171b521b8bb712a443cfe905db1368aa"
+    },
+    {
+      "number": 7,
+      "name": "点赞",
+      "source": "final/current-14-20260930/gif/07_点赞.gif",
+      "asset": "/projects/yy-stickers/07.gif",
+      "sha256": "9c5e4f73fd227a85cd136b6364526876da418f16e00faa34f58471d90e9e5d6d",
+      "frames": 80,
+      "durationMs": 3200,
+      "previewFrame": 29,
+      "posterSha256": "0d688e97de496082beda1320ff99a7754ab241a0afc1d263be35cae929dcccd0"
+    },
+    {
+      "number": 8,
+      "name": "公文包打包上班",
+      "source": "final/current-14-20260930/gif/08_公文包打包上班.gif",
+      "asset": "/projects/yy-stickers/08.gif",
+      "sha256": "99e8d0ef900cf4bd983c01c3759fa5e614c00e1e5cfdd0391be54502121b4ec8",
+      "frames": 32,
+      "durationMs": 1280,
+      "previewFrame": 21,
+      "posterSha256": "95588533f35aaeebd7decbf14459f9fc84a8c8383b4005acf45d3c9f42405d4a"
+    },
+    {
+      "number": 9,
+      "name": "OK手型大帽子",
+      "source": "final/current-14-20260930/gif/09_OK手型大帽子.gif",
+      "asset": "/projects/yy-stickers/09.gif",
+      "sha256": "d5d4a07af62c9310ebbb31ef0a85f3e38119983e52247038e12d4f15d84178ac",
+      "frames": 73,
+      "durationMs": 2920,
+      "previewFrame": 22,
+      "posterSha256": "071ba74516ea30686582a00270412a0a9c96f7ded37ed5b3f80749f869e416d2"
+    },
+    {
+      "number": 10,
+      "name": "发财数钱",
+      "source": "final/current-14-20260930/gif/10_发财数钱.gif",
+      "asset": "/projects/yy-stickers/10.gif",
+      "sha256": "546f9e54ebbf44f2450c868780b80685d8511d51a7b6ea693d5207349aa4aa29",
+      "frames": 81,
+      "durationMs": 2640,
+      "previewFrame": 29,
+      "posterSha256": "9a698fb02e7c15f671f6b087c42fe65ed003208fc4d723e012e23b11c7db5763"
+    },
+    {
+      "number": 11,
+      "name": "吸收知识",
+      "source": "final/current-14-20260930/gif/11_吸收知识.gif",
+      "asset": "/projects/yy-stickers/11.gif",
+      "sha256": "47e0e91a830516af2bf0c67af2370f011a793bb869b2fd801e67838239fc431a",
+      "frames": 16,
+      "durationMs": 2760,
+      "previewFrame": 10,
+      "posterSha256": "59ed922a7eb085095fe57331756d074bedebce7be15cbac95ab7c9cd65aa8c67"
+    },
+    {
+      "number": 12,
+      "name": "坏了",
+      "source": "final/current-14-20260930/gif/12_坏了.gif",
+      "asset": "/projects/yy-stickers/12.gif",
+      "sha256": "4b739fd464b620b80ec3b59351bbf0a67888e038482ea061ea57de71bbbfb353",
+      "frames": 13,
+      "durationMs": 2410,
+      "previewFrame": 6,
+      "posterSha256": "32891b65a384b98f4756ad3a93f99cfeeee58c2d7681ce3da7a813ddd779fa32"
+    },
+    {
+      "number": 13,
+      "name": "吸鼻涕",
+      "source": "final/current-14-20260930/gif/13_吸鼻涕.gif",
+      "asset": "/projects/yy-stickers/13.gif",
+      "sha256": "f76cecce6bfed61b2dc4b138fecbd6c42bde4c36f9a9a07ef2c0dad23dac0e5b",
+      "frames": 16,
+      "durationMs": 2860,
+      "previewFrame": 10,
+      "posterSha256": "91512dfeee0bb85235575210f9e621d821ff4632a11bac0d561b5939f6720977"
+    },
+    {
+      "number": 14,
+      "name": "开车",
+      "source": "final/current-14-20260930/gif/14_开车.gif",
+      "asset": "/projects/yy-stickers/14.gif",
+      "sha256": "e50e648c30ee47fffaaefcece83f1ae57b516e1634b33417e714c7b67f2a4e87",
+      "frames": 60,
+      "durationMs": 2400,
+      "previewFrame": 35,
+      "posterSha256": "4b09957fad01daddaeb769c1b307d78df8d14b59d18d3ae7a26f95b3ddabdf35"
+    }
+  ]
+}

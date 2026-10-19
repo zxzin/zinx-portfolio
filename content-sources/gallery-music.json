@@ -1,0 +1,38 @@
+{
+  "title": "Arcade Lounge",
+  "asset": "/audio/gallery-ambient.mp3",
+  "sha256": "a69fedc0130d48b0098724dded7b5167f508a0d0329af947d5e0992bf31c58ba",
+  "bytes": 407554,
+  "durationSeconds": 25.4,
+  "format": {
+    "container": "mp3",
+    "bitrateKbps": 128,
+    "channels": 2
+  },
+  "source": {
+    "model": "ACE-Step 1.5",
+    "generatedAt": "2026-10-05T12:33:53+08:00",
+    "seed": 20261005,
+    "masterSha256": "8f2729f7ca4d06d12637a638996be121da1d26c0f76682d6b1f40ead4233c78a",
+    "modelReference": "https://huggingface.co/ACE-Step/Ace-Step1.5"
+  },
+  "webEdit": {
+    "date": "2026-10-19",
+    "newGeneration": false,
+    "method": "Circular loop crossfade, 1.6 seconds; stereo MP3 export"
+  },
+  "audioQA": {
+    "integratedLufs": -22.43,
+    "truePeakDbtp": -7.23,
+    "loopBoundaryJumpDbfs": -50.3,
+    "listeningReview": "not performed"
+  },
+  "playback": {
+    "default": "off",
+    "volume": 0.6,
+    "fadeInMs": 650,
+    "audibleVideo": "pause",
+    "pageHidden": "pause",
+    "slotEffects": "duck"
+  }
+}

@@ -1,36 +1,8 @@
 import { OPENING_CUES } from "./arcade-state.ts";
 import { COIN_COUNT, COIN_FLIGHT_SECONDS, coinContactProgress } from "./arcade-physics.ts";
 /** Original procedural arcade score. Times are relative to the reel's motion start. */
-export type SoundNote = { kind: "kick" | "bass" | "pad" | "pluck" | "clap" | "hat" | "metal" | "tick" | "stop" | "rise" | "chord" | "burst"; at: number; duration: number; frequency: number; gain: number; pan?: number };
+export type SoundNote = { kind: "kick" | "bass" | "clap" | "hat" | "metal" | "tick" | "stop" | "rise" | "chord" | "burst"; at: number; duration: number; frequency: number; gain: number; pan?: number };
 
-export const BGM_BPM = 112;
-export const BGM_LOOP_SECONDS = 32 * 60 / BGM_BPM;
-/** Eight original bars, E minor: low-slung arcade groove with a restrained melodic answer. */
-export function backgroundScore(): SoundNote[] {
-  const beat = 60 / BGM_BPM, notes: SoundNote[] = [];
-  const harmony = [[164.81, 196, 246.94, 369.99], [130.81, 164.81, 196, 246.94], [146.83, 174.61, 220, 329.63], [123.47, 164.81, 185, 246.94]];
-  const roots = [82.41, 65.41, 73.42, 61.74];
-  for (let bar = 0; bar < 8; bar++) {
-    const start = bar * 4 * beat, chord = harmony[Math.floor(bar / 2)];
-    chord.forEach((frequency, i) => notes.push({ kind: "pad", at: start + .015, duration: beat * 3.8, frequency, gain: .035, pan: (i - 1.5) * .3 }));
-    for (let step = 0; step < 8; step++) {
-      const at = start + step * beat / 2 + (step % 2 ? .018 : 0);
-      if (step % 2 === 0) notes.push({ kind: "kick", at, duration: .24, frequency: 145, gain: step === 0 ? .3 : .24 });
-      if (step === 2 || step === 6) notes.push({ kind: "clap", at, duration: .1, frequency: 1650, gain: .1, pan: -.12 });
-      notes.push({ kind: "hat", at, duration: step % 2 ? .08 : .025, frequency: 5800, gain: step % 2 ? .05 : .025, pan: step % 2 ? .32 : -.32 });
-      if ([1, 3, 4, 7].includes(step)) notes.push({ kind: "bass", at: at + .025, duration: .17, frequency: roots[Math.floor(bar / 2)] * (step === 7 && bar % 2 ? 2 : 1), gain: .2 });
-      if (bar % 2 && [1, 4, 6].includes(step)) notes.push({ kind: "pluck", at: at + .012, duration: .19, frequency: chord[step % 4] * 2, gain: .047, pan: step === 4 ? -.45 : .45 });
-    }
-  }
-  return notes.sort((a, b) => a.at - b.at);
-}
-
-/** Render one stable loop once; buffer playback keeps BGM continuous across route changes. */
-export async function renderBackgroundLoop(sampleRate: number) {
-  const ctx = new OfflineAudioContext(2, Math.ceil(BGM_LOOP_SECONDS * sampleRate), sampleRate);
-  scheduleScore(ctx, ctx.destination, backgroundScore(), 0);
-  return ctx.startRendering();
-}
 export function spinScore(round: number, stops: number[]): SoundNote[] {
   const length = Math.max(...stops);
   const notes: SoundNote[] = [{ kind: "rise", at: 0, duration: length, frequency: 180 + round * 90, gain: .13 }];
@@ -108,11 +80,11 @@ export function scheduleScore(ctx: BaseAudioContext, destination: AudioNode, sco
         source.frequency.exponentialRampToValueAtTime(46, end);
       }
       filter.type = "lowpass";
-      filter.frequency.setValueAtTime(note.kind === "bass" ? 1100 : note.kind === "pad" ? 850 : note.kind === "pluck" ? 2300 : note.kind === "chord" ? 1700 : 4500, at);
+      filter.frequency.setValueAtTime(note.kind === "bass" ? 1100 : note.kind === "chord" ? 1700 : 4500, at);
       if (note.kind === "bass") { filter.Q.value = 1.1; filter.frequency.exponentialRampToValueAtTime(180, end); }
     }
     gain.gain.setValueAtTime(.0001, at);
-    gain.gain.exponentialRampToValueAtTime(note.gain, at + Math.min(note.kind === "pad" ? .18 : .007, note.duration / 4));
+    gain.gain.exponentialRampToValueAtTime(note.gain, at + Math.min(.007, note.duration / 4));
     if (note.kind === "rise") {
       gain.gain.setValueAtTime(note.gain * .16, at + .008);
       gain.gain.exponentialRampToValueAtTime(note.gain, end - .025);

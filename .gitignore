@@ -133,3 +133,5 @@ yarn-error.log*
 !/public/projects/yy-stickers/13.png
 !/public/projects/yy-stickers/14.gif
 !/public/projects/yy-stickers/14.png
+
+!/public/audio/gallery-ambient.mp3

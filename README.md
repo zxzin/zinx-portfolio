@@ -3,7 +3,7 @@
 Zinx 的个人作品网站。React + TypeScript 管理作品和展览编排，R3F / Three.js 构建可操作的机器入口，GSAP 驱动开场与作品展开。Vite 输出静态文件，可使用 GitHub Pages。
 
 当前版本为可扩展金币展台：红幕揭幕 → 三次操作各转一轮 → 机器冒烟爆开 → 金币落桌 → 翻面预览 → 真实详情。底部可一键翻开/收回，作品按数据配置。
-入口支持拉杆、点击、Enter/Space；展墙使用滚动、触摸和章节定位，点击作品展开，Esc 关闭，详情支持上一件/下一件。声音默认开启，首次用户手势解锁，静音偏好保存在本机。首页 `/` 或 `#top` 每次都显示老虎机，`#hub` 直达展墙；旧 `?view=library` 统一显示当前策展结果，静态浏览位于 `?render=static`。
+入口支持拉杆、点击、Enter/Space；展墙使用滚动、触摸和章节定位，点击作品展开，Esc 关闭，详情支持上一件/下一件。音乐与音效默认关闭，点击“音乐”开启；当前标签页记住选择，并与简历页共享开启意图。背景配乐在页面隐藏或有声影片播放时暂停，片段结束后恢复，老虎机音效出现时降低配乐音量。首页 `/` 或 `#top` 每次都显示老虎机，`#hub` 直达展墙；旧 `?view=library` 统一显示当前策展结果，静态浏览位于 `?render=static`。
 
 当前展出 12 件，覆盖产品、工具、游戏、影像、表情和雕塑。影像区展示「YY 来录一段」「秘密的爱」「烟嘴里的气流」；VideoPro 独立 Skill 展项与数数城等候选保留在清单，默认不展出。
 
@@ -60,7 +60,7 @@ YY 的源生动作由 YYActionStage 呈现在详情中；YYCompanion 在入口�
 - `src/lib/exhibition-model.ts`：稳定 ID、媒体类型与编排校验。
 - `src/components/ProjectCard.tsx`：沿用内容接口的双面作品金币、真实媒体、悬浮翻转与触摸展开。
 - `src/components/ExhibitionWall.tsx` / `ExhibitDialog.tsx`：自适应金币展台、来源位置展开、媒体与焦点返回。
-- `src/lib/useExhibitionAudio.ts`：声音偏好、手势解锁、页面隐藏时暂停。
+- `src/lib/useExhibitionAudio.ts` / `ambient-music.ts`：单曲循环、用户手势、同标签页偏好与有声影片自动让声。
 - `src/design/tokens.css` / `PanelBar.tsx`：统一几何、材质和窗口标题栏。
 - `src/ZinxPortfolio.tsx`：共享真实案例、系统展示与详情组件。
 - `src/content/portfolio.ts`：项目、代表案例与工作系统。

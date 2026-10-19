@@ -234,12 +234,13 @@ test("scene-mounted settings and companion controls retain semantic inputs and t
   assert.doesNotMatch(entrance, /yy-dance-pause|entrance-hud/);
 });
 
-test("sound defaults on, unlocks on user gesture and stays outside entrance timeline dependencies", async () => {
+test("music defaults off, unlocks on user gesture and stays outside entrance timeline dependencies", async () => {
   const audio = await read("src/lib/useExhibitionAudio.ts");
   const controller = await read("src/lib/useArcade.ts");
-  assert.match(audio, /!== "off"/);
-  assert.match(audio, /"pointerdown", unlock, true/);
-  assert.match(audio, /"keydown", unlock, true/);
+  assert.match(audio, /desired: false, playing: false, status: "muted"/);
+  assert.match(audio, /sessionStorage.setItem/);
+  assert.match(audio, /"pointerdown", gesture, true/);
+  assert.match(audio, /"keydown", gesture, true/);
   assert.match(audio, /visibilitychange/);
   assert.match(audio, /audio.current\?\.close/);
   assert.doesNotMatch(controller, /state.sound|new AudioContext/);

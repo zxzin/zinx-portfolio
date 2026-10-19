@@ -21,7 +21,7 @@ const outfitNames = { daily: "出门走走", scarf: "红围巾", hat: "小黄帽
 
 export default function PortalEntrance() {
   const reduced = useReducedMotion();
-  const { enabled, status, bgmStatus, toggle, pulse, spin, open, silence } = useExhibitionAudio();
+  const { enabled, desired, label, status, bgmStatus, toggle, pulse, spin, open, silence } = useExhibitionAudio();
   const [ready, setReady] = useState(false);
   const { state, motion, stage, pull, fail, direct, restart, dragLever, releaseLever } = useArcade(reduced, spin, open, silence, ready);
   const [group, setGroup] = useState("selected");
@@ -61,7 +61,7 @@ export default function PortalEntrance() {
       </a>
       <nav className="scene-control-rail" aria-label="展示设置">
         {exhibition && <a className="opening-link" href={home + "#top"} onClick={event => { event.preventDefault(); replay(); }}><span aria-hidden="true">▥</span>老虎机开场</a>}
-        <button className="rail-switch" type="button" onClick={toggle} aria-pressed={enabled} aria-label={enabled ? "关闭声音" : "开启声音"}><svg className="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM17 8q5 4 0 8" /></svg><span>声音 <small>{enabled ? "开" : "关"}</small></span><i className="rail-indicator" aria-hidden="true" /></button>
+        <button className="rail-switch" type="button" data-music-control onClick={toggle} aria-pressed={enabled} aria-label={desired && !["waiting-for-gesture", "unavailable"].includes(bgmStatus) ? "关闭背景音乐与音效" : "开启背景音乐与音效"} title={bgmStatus === "paused-media" ? "影片播放时音乐暂停" : bgmStatus === "unavailable" ? "音乐暂未加载，点击重试" : "原创配乐 · Zinx Gallery"}><svg className="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 7l11-2M9 18c0 2-5 3-5 0s5-3 5 0M20 16c0 2-5 3-5 0s5-3 5 0" /></svg><span>音乐 <small>{label}</small></span><i className="rail-indicator" aria-hidden="true" /></button>
         <a className="rail-about" href="#about"><span className="rail-seal" aria-hidden="true">Z</span>关于我<span className="rail-arrow" aria-hidden="true">↗</span></a>
       </nav>
     </header>

@@ -23,9 +23,20 @@ export function createPetalGeometry(width: number, length: number, curl: number,
 const petal = createPetalGeometry;
 // Roses and lilies carry the arrangement; the smaller varieties provide color accents.
 export const FLORAL_RHYTHM = ["rose", "lily", "rose", "dahlia", "rose", "lily", "hydrangea", "lily", "cosmos"] as const;
+export const BACKGROUND_FLORAL_RHYTHM = ["rose", "lily", "rose", "lily", "hydrangea", "rose", "lily", "hydrangea", "rose"] as const;
+export const BACKGROUND_FLOWER_COUNT = BACKGROUND_FLORAL_RHYTHM.length;
+export const BACKGROUND_FLORAL_PLACEMENTS = [
+  { position: [-7.2, 0, -4.3] as [number, number, number], scale: .72, rotation: .18 },
+  { position: [7.2, 0, -4.3] as [number, number, number], scale: .68, rotation: -.24 },
+] as const;
+const backgroundHeads = [
+  [-.64, .66, .08], [.34, 1.02, .02], [-.46, 1.48, -.12],
+  [-.2, 2.12, -.03], [.56, 1.72, -.16], [.1, 2.7, -.09],
+  [.62, .5, .12], [-.76, 1.92, -.15], [.54, 2.34, -.1],
+] as const;
 
 /** Fixed floral arrangement, batched by material; no per-frame flower rendering loop. */
-export function createFloralArrangement(layout: "bouquet" | "garland" = "bouquet") {
+export function createFloralArrangement(layout: "bouquet" | "garland" | "background" = "bouquet") {
   const pieces = new Map<string, THREE.BufferGeometry[]>();
   const add = (color: string, geometry: THREE.BufferGeometry, matrix = new THREE.Matrix4()) => {
     const positions = geometry.getAttribute("position"), shades = new Float32Array(positions.count * 3);
@@ -37,7 +48,14 @@ export function createFloralArrangement(layout: "bouquet" | "garland" = "bouquet
     geometry.applyMatrix4(matrix); const list = pieces.get(color) ?? []; list.push(geometry); pieces.set(color, list);
   };
   const matrix = (p: THREE.Vector3, r: THREE.Euler, scale = new THREE.Vector3(1, 1, 1)) => new THREE.Matrix4().compose(p, new THREE.Quaternion().setFromEuler(r), scale);
-  const flowerCount = layout === "garland" ? 17 : FLOWERS_PER_BOUQUET;
+  const background = layout === "background";
+  const flowerCount = background ? BACKGROUND_FLOWER_COUNT : layout === "garland" ? 17 : FLOWERS_PER_BOUQUET;
+  const branchSpines = background ? [
+    new THREE.CatmullRomCurve3([new THREE.Vector3(-.09, .03, -.2), new THREE.Vector3(-.22, .77, -.22), new THREE.Vector3(-.25, 1.58, -.18), new THREE.Vector3(.1, 2.7, -.09)]),
+    new THREE.CatmullRomCurve3([new THREE.Vector3(-.03, .03, -.18), new THREE.Vector3(-.12, .68, -.17), new THREE.Vector3(-.48, 1.35, -.18), new THREE.Vector3(-.76, 1.92, -.15)]),
+    new THREE.CatmullRomCurve3([new THREE.Vector3(.05, .03, -.16), new THREE.Vector3(.17, .72, -.18), new THREE.Vector3(.4, 1.58, -.17), new THREE.Vector3(.54, 2.34, -.1)]),
+  ] : [];
+  for (const spine of branchSpines) add(floralPalette.stem, new THREE.TubeGeometry(spine, 20, .013, 5, false));
   if (layout === "garland") {
     const spine = new THREE.CatmullRomCurve3([new THREE.Vector3(-3.44, 1.85, -.12), new THREE.Vector3(-3.5, 3, -.13), new THREE.Vector3(-3.46, 4.5, -.12), new THREE.Vector3(-3.29, 5.24, -.1), new THREE.Vector3(-2, 5.28, -.12)]);
     add(floralPalette.stem, new THREE.TubeGeometry(spine, 36, .026, 6, false));
@@ -46,21 +64,22 @@ export function createFloralArrangement(layout: "bouquet" | "garland" = "bouquet
   }
   for (let i = 0; i < flowerCount; i++) {
     const angle = i * 2.39996, spread = .24 + Math.sqrt(i / (FLOWERS_PER_BOUQUET - 1)) * .6;
-    const head = layout === "bouquet"
+    const head = background ? new THREE.Vector3(...backgroundHeads[i]) : layout === "bouquet"
       ? new THREE.Vector3(Math.cos(angle) * spread, 1.18 + (i % 5) * .18, Math.sin(angle) * .3)
       : i < 11 ? new THREE.Vector3(-3.43 + Math.sin(i * 2) * .1, 2.1 + i * .3, 0)
       : i < 14 ? new THREE.Vector3(-3.2 + (i - 11) * .6, 5.29 + Math.sin(i) * .06, 0)
       : new THREE.Vector3(2.5 + (i - 14) * .4, 5.28 - (i - 14) * .13, 0);
-    const root = layout === "bouquet" ? new THREE.Vector3(head.x * .13, .35, -.1)
+    const root = background ? branchSpines[i % 3].getPoint(Math.min(.78, head.y / 3.8))
+      : layout === "bouquet" ? new THREE.Vector3(head.x * .13, .35, -.1)
       : head.clone().add(head.y > 4.9 && head.x > -3.25 ? new THREE.Vector3(-.3, .02, -.12) : new THREE.Vector3(.04, -.38, -.12));
     const curve = new THREE.QuadraticBezierCurve3(root, root.clone().lerp(head, .65).add(new THREE.Vector3(-.07, 0, -.12)), head);
-    add(floralPalette.stem, new THREE.TubeGeometry(curve, 8, .014, 5, false));
+    add(floralPalette.stem, new THREE.TubeGeometry(curve, 8, background ? .009 : .014, 5, false));
     for (const side of [-1, 1]) {
       const leafAt = curve.getPoint(side < 0 ? .42 : .65);
-      add(floralPalette.leaf, petal(.09, .38, .065), matrix(leafAt, new THREE.Euler(-.4, side * .45, side * 1.1)));
+      add(floralPalette.leaf, petal(background ? .055 : .09, background ? .29 : .38, .065), matrix(leafAt, new THREE.Euler(-.4, side * .45, side * 1.1)));
     }
-    const kind = FLORAL_RHYTHM[i % FLORAL_RHYTHM.length];
-    const flowerScale = (layout === "garland" ? .63 : 1) * (.78 + (i % 4) * .08) * (kind === "hydrangea" || kind === "cosmos" ? .79 : 1);
+    const kind = background ? BACKGROUND_FLORAL_RHYTHM[i] : FLORAL_RHYTHM[i % FLORAL_RHYTHM.length];
+    const flowerScale = (background ? .55 : layout === "garland" ? .63 : 1) * (.78 + (i % 4) * .08) * (kind === "hydrangea" || kind === "cosmos" ? .79 : 1);
     const tilt = matrix(head, new THREE.Euler(-.3 + Math.sin(i) * .42, Math.cos(i * 2) * .45, angle), new THREE.Vector3().setScalar(flowerScale));
     const rose = kind === "rose", lily = kind === "lily", dahlia = kind === "dahlia", hydrangea = kind === "hydrangea";
     add(floralPalette.leaf, new THREE.SphereGeometry(.064, 8, 6), tilt.clone().multiply(new THREE.Matrix4().makeScale(.8, .8, 1.2)));
@@ -101,7 +120,12 @@ export function createFloralArrangement(layout: "bouquet" | "garland" = "bouquet
   return [...pieces].map(([color, geometries]) => {
     const geometry = mergeGeometries(geometries); geometries.forEach(part => part.dispose());
     if (!geometry) throw new Error("Floral geometry must share attributes");
-    const material = new THREE.MeshPhysicalMaterial({ color, vertexColors: true, roughness: .78, metalness: 0, side: THREE.DoubleSide, sheen: .5, sheenColor: new THREE.Color("#ffe4e7"), sheenRoughness: .8, emissive: color, emissiveIntensity: .025 });
+    const material = new THREE.MeshPhysicalMaterial({
+      color: background ? new THREE.Color(color).multiplyScalar(.68) : color,
+      vertexColors: true, roughness: background ? .93 : .78, metalness: 0, side: THREE.DoubleSide,
+      sheen: background ? .12 : .5, sheenColor: new THREE.Color("#ffe4e7"), sheenRoughness: .8,
+      emissive: background ? 0x000000 : color, emissiveIntensity: background ? 0 : .025,
+    });
     return { color, geometry, material };
   });
 }

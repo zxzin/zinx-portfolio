@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { DoubleSide, type Group } from "three";
 import type { ArcadeMotion } from "../lib/arcade-state";
-import { createFloralArrangement, createPetalGeometry, floralPalette } from "../lib/floral-arrangement";
+import { BACKGROUND_FLORAL_PLACEMENTS, createFloralArrangement, createPetalGeometry, floralPalette } from "../lib/floral-arrangement";
 import { PETAL_COUNT, petalFlight } from "../lib/arcade-physics";
 
 function LoosePetals({ motion }: { motion: ArcadeMotion }) {
@@ -27,6 +27,7 @@ function LoosePetals({ motion }: { motion: ArcadeMotion }) {
 export default function CasinoFlorals({ motion }: { motion: ArcadeMotion }) {
   const batches = useMemo(() => createFloralArrangement(), []);
   const garland = useMemo(() => createFloralArrangement("garland"), []);
+  const backgroundBranches = useMemo(() => createFloralArrangement("background"), []);
   const tableFlowers = useRef<Group>(null);
   const machineFlowers = useRef<Group>(null);
   const flowerHeads = useRef<(Group | null)[]>([]);
@@ -41,7 +42,7 @@ export default function CasinoFlorals({ motion }: { motion: ArcadeMotion }) {
     }
     flowerHeads.current.forEach((head, i) => { if (head) head.rotation.z = Math.sin(motion.petals * Math.PI * 3) * (1 - motion.petals) ** 2 * .12 * (i % 2 ? -1 : 1); });
   });
-  useEffect(() => () => [...batches, ...garland].forEach(({geometry, material}) => { geometry.dispose(); material.dispose(); }), [batches, garland]);
+  useEffect(() => () => [...batches, ...garland, ...backgroundBranches].forEach(({geometry, material}) => { geometry.dispose(); material.dispose(); }), [batches, garland, backgroundBranches]);
   const bouquet = (at: [number, number, number], scale: number, turn: number, name: string, index: number) => <group position={at} scale={scale} rotation={[0, turn, 0]} name={name}>
       <group position={[0, .54, 0]} ref={node => { flowerHeads.current[index] = node; }}><group position={[0, -.54, 0]}>
         {batches.map(({color, geometry, material}) => <mesh key={color} geometry={geometry} material={material} receiveShadow dispose={null} />)}
@@ -50,6 +51,12 @@ export default function CasinoFlorals({ motion }: { motion: ArcadeMotion }) {
       <mesh position={[0, .53, -.08]} rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[.205, .035, 6, 24]} /><meshStandardMaterial color="#f6d5a0" metalness={.8} roughness={.23} /></mesh>
     </group>;
   return <group name="romantic-floral-salon">
+    <group name="quiet-background-floral-branches">
+      {BACKGROUND_FLORAL_PLACEMENTS.map(({ position, scale, rotation }, i) =>
+        <group key={i} position={position} scale={scale} rotation={[0, rotation, 0]} name={`background-floral-wing-${i}`}>
+          {backgroundBranches.map(({ color, geometry, material }) => <mesh key={color} geometry={geometry} material={material} receiveShadow dispose={null} />)}
+        </group>)}
+    </group>
     <group ref={machineFlowers} name="cabinet-floral-garland" position={[0, 0, 1.6]}>
       {garland.map(({color, geometry, material}) => <mesh key={color} geometry={geometry} material={material} receiveShadow dispose={null} />)}
       {[2.3, 3.8, 4.88].map(y => <mesh key={y} position={[-3.46, y, -.1]} rotation={[0, Math.PI / 2, .2]}><torusGeometry args={[.065, .015, 6, 12]} /><meshStandardMaterial color="#be995f" metalness={.72} roughness={.35} /></mesh>)}

@@ -28,11 +28,15 @@ function harness() {
 }
 const settle = async () => { await Promise.resolve(); await Promise.resolve(); };
 
-test('music is opt-in, uses the shared tab preference, and tolerates blocked storage', () => {
+test('music defaults on, preserves explicit mute, and tolerates blocked storage', () => {
   assert.equal(MUSIC_PREFERENCE_KEY, 'zinx-music-enabled');
-  for (const stored of [null, 'false', 'on']) assert.equal(readMusicPreference({ getItem: () => stored }), false);
-  assert.equal(readMusicPreference({ getItem: () => 'true' }), true);
-  assert.equal(readMusicPreference({ getItem() { throw Error('blocked'); } }), false);
+  for (const stored of [null, 'true', 'on']) assert.equal(readMusicPreference({ getItem: () => stored }), true);
+  assert.equal(readMusicPreference({ getItem: () => 'false' }), false);
+  assert.equal(readMusicPreference({ getItem() { throw Error('blocked'); } }), true);
+  assert.equal(readMusicPreference(), true);
+});
+
+test('the player waits for the preference before creating audio', () => {
   const h = harness(); h.music.unlock();
   assert.equal(h.created(), 0);
   assert.deepEqual(h.music.snapshot, { desired: false, playing: false, status: 'muted' });
@@ -53,10 +57,10 @@ test('one looping track fades in, ducks for effects, and resumes its position', 
   assert.equal(h.created(), 1); assert.equal(h.audio.currentTime, 7);
 });
 
-test('blocked autoplay remains visibly off and a subsequent gesture can start it', async () => {
+test('default-on autoplay waits for a gesture without claiming playback', async () => {
   const h = harness();
   h.audio.play = () => Promise.reject(Object.assign(new Error('gesture needed'), { name: 'NotAllowedError' }));
-  h.music.setEnabled(true); await settle();
+  h.music.setEnabled(readMusicPreference({ getItem: () => null })); await settle();
   assert.deepEqual(h.music.snapshot, { desired: true, playing: false, status: 'waiting-for-gesture' });
   h.audio.play = () => { h.audio.paused = false; return Promise.resolve(); };
   h.music.unlock(); await settle(); assert.equal(h.music.snapshot.status, 'playing');

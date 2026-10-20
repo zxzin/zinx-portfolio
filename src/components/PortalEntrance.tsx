@@ -2,6 +2,7 @@ import { Component, lazy, Suspense, useCallback, useEffect, useState } from "rea
 import type { ReactNode } from "react";
 import { useArcade } from "../lib/useArcade";
 import { useExhibitionAudio } from "../lib/useExhibitionAudio";
+import { profile } from "../content/profile";
 import { useReducedMotion } from "../lib/motion";
 import { Pixels } from "../ZinxPortfolio";
 import { YYCompanion, type YYOutfit } from "./YYCompanion";
@@ -21,7 +22,7 @@ const outfitNames = { daily: "出门走走", scarf: "红围巾", hat: "小黄帽
 
 export default function PortalEntrance() {
   const reduced = useReducedMotion();
-  const { enabled, desired, label, status, bgmStatus, toggle, pulse, spin, open, silence } = useExhibitionAudio();
+  const { desired, label, status, bgmStatus, toggle, pulse, spin, open, silence } = useExhibitionAudio();
   const [ready, setReady] = useState(false);
   const { state, motion, stage, pull, fail, direct, restart, dragLever, releaseLever } = useArcade(reduced, spin, open, silence, ready);
   const [group, setGroup] = useState("selected");
@@ -61,8 +62,8 @@ export default function PortalEntrance() {
       </a>
       <nav className="scene-control-rail" aria-label="展示设置">
         {exhibition && <a className="opening-link" href={home + "#top"} onClick={event => { event.preventDefault(); replay(); }}><span aria-hidden="true">▥</span>老虎机开场</a>}
-        <button className="rail-switch" type="button" data-music-control onClick={toggle} aria-pressed={enabled} aria-label={desired && !["waiting-for-gesture", "unavailable"].includes(bgmStatus) ? "关闭背景音乐与音效" : "开启背景音乐与音效"} title={bgmStatus === "paused-media" ? "影片播放时音乐暂停" : bgmStatus === "unavailable" ? "音乐暂未加载，点击重试" : "原创配乐 · Zinx Gallery"}><svg className="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 7l11-2M9 18c0 2-5 3-5 0s5-3 5 0M20 16c0 2-5 3-5 0s5-3 5 0" /></svg><span>音乐 <small>{label}</small></span><i className="rail-indicator" aria-hidden="true" /></button>
-        <a className="rail-about" href="#about"><span className="rail-seal" aria-hidden="true">Z</span>关于我<span className="rail-arrow" aria-hidden="true">↗</span></a>
+        <button className="rail-switch" type="button" data-music-control onClick={toggle} aria-pressed={desired} aria-label={desired && !["waiting-for-gesture", "unavailable"].includes(bgmStatus) ? "关闭背景音乐与音效" : "开启背景音乐与音效"} title={bgmStatus === "paused-media" ? "影片播放时音乐暂停" : bgmStatus === "waiting-for-gesture" ? "音乐已开启，点击页面后开始播放" : bgmStatus === "unavailable" ? "音乐暂未加载，点击重试" : "原创配乐 · Zinx Gallery"}><svg className="rail-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13M9 7l11-2M9 18c0 2-5 3-5 0s5-3 5 0M20 16c0 2-5 3-5 0s5-3 5 0" /></svg><span>音乐 <small>{label}</small></span><i className="rail-indicator" aria-hidden="true" /></button>
+        <a className="rail-about" href={profile.resume} aria-label="关于我：打开个人简历"><span className="rail-seal" aria-hidden="true">Z</span>关于我<span className="rail-arrow" aria-hidden="true">↗</span></a>
       </nav>
     </header>
     {!ready && !state.fallback && !exhibition && <div className="arcade-loading" role="status"><Pixels /><span>正在准备开场</span><button type="button" onClick={fail}>直接浏览</button></div>}

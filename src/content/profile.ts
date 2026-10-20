@@ -3,5 +3,5 @@ export const profile = {
   github: "https://github.com/zxzin",
   contact: "",
   contactLabel: "联系我",
-  resume: "",
+  resume: "https://zxzin.github.io/zinx-resume/",
 };

@@ -3,9 +3,9 @@ import { createScoreBus, openingScore, scheduleScore, spinScore, type SoundNote 
 import { createAmbientMusic, hasAudibleMedia, MUSIC_PREFERENCE_KEY, readMusicPreference, type MusicSnapshot } from "./ambient-music";
 
 export function useExhibitionAudio() {
-  const [music, setMusic] = useState<MusicSnapshot>({ desired: false, playing: false, status: "muted" });
-  const [status, setStatus] = useState("muted");
-  const preference = useRef(false), audio = useRef<AudioContext | null>(null), mediaBusy = useRef(false);
+  const [music, setMusic] = useState<MusicSnapshot>({ desired: true, playing: false, status: "waiting-for-gesture" });
+  const [status, setStatus] = useState("waiting-for-gesture");
+  const preference = useRef(true), audio = useRef<AudioContext | null>(null), mediaBusy = useRef(false);
   const master = useRef<GainNode | null>(null), stopScore = useRef<(() => void) | null>(null);
   const background = useRef<ReturnType<typeof createAmbientMusic> | null>(null);
   const silence = useCallback(() => { stopScore.current?.(); stopScore.current = null; }, []);
@@ -80,7 +80,7 @@ export function useExhibitionAudio() {
     observer.observe(document.body, { childList: true, subtree: true });
     player.setHidden(document.hidden);
     scanMedia();
-    try { preference.current = readMusicPreference(sessionStorage); } catch { preference.current = false; }
+    try { preference.current = readMusicPreference(sessionStorage); } catch { preference.current = readMusicPreference(); }
     player.setEnabled(preference.current);
     window.addEventListener("pointerdown", gesture, true);
     window.addEventListener("keydown", gesture, true);
@@ -94,6 +94,6 @@ export function useExhibitionAudio() {
       silence(); void audio.current?.close(); audio.current = null; master.current = null;
     };
   }, [unlock, silence]);
-  const label = music.status === "loading" ? "加载中" : music.status === "paused-media" ? "影片中" : music.playing ? "开" : "关";
+  const label = music.status === "loading" ? "加载中" : music.status === "paused-media" ? "影片中" : music.status === "waiting-for-gesture" ? "待播放" : music.status === "unavailable" ? "重试" : music.playing ? "开" : "关";
   return { enabled: music.playing, desired: music.desired, label, status, bgmStatus: music.status, toggle, pulse, spin, open, silence };
 }

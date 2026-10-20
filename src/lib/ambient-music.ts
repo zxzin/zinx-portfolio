@@ -11,8 +11,8 @@ type MusicRuntime = {
   cancelDelay: (id: ReturnType<typeof setTimeout>) => void;
 };
 
-export function readMusicPreference(storage: Pick<Storage, "getItem">): boolean {
-  try { return storage.getItem(MUSIC_PREFERENCE_KEY) === "true"; } catch { return false; }
+export function readMusicPreference(storage?: Pick<Storage, "getItem">): boolean {
+  try { return storage?.getItem(MUSIC_PREFERENCE_KEY) !== "false"; } catch { return true; }
 }
 
 export function hasAudibleMedia(elements: Iterable<Pick<HTMLMediaElement, "paused" | "ended" | "muted" | "volume">>): boolean {

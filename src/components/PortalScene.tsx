@@ -1,16 +1,18 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Html, Lightformer, MeshReflectorMaterial, RoundedBox, useTexture } from "@react-three/drei";
+import { Environment, Html, Lightformer, RoundedBox, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { entranceEmblems } from "../content/exhibition";
 import { backgroundExhibits, backgroundSlots } from "../content/gallery-background";
 import StageCurtain from "./StageCurtain";
 import CasinoFlorals from "./CasinoFlorals";
+import { CasinoArchitecture, GalleryNiche, ExhibitPlinth } from "./GalleryArchitecture";
 import { DavidSculpture } from "./DavidSculpture";
 import { MediaBoundary } from "./MediaBoundary";
 import { YYCompanion, type YYOutfit } from "./YYCompanion";
 import { galleryLayout } from "../lib/gallery-layout";
+import { machineLightCue } from "../lib/gallery-lighting";
 import { drawReelEmblem } from "../lib/reel-art";
 import { coinFlight, COIN_COUNT } from "../lib/arcade-physics";
 import {
@@ -98,7 +100,7 @@ function MarqueeLightbox() {
           vec2 p=(uvLight-.5)*vec2(7.5,1.75);
           vec2 q=abs(p)-vec2(2.96,.12);
           float d=length(max(q,0.))+min(max(q.x,q.y),0.)-.16;
-          float halo=exp(-max(d,0.)*10.)*.28;
+          float halo=exp(-max(d,0.)*10.)*.34;
           gl_FragColor=vec4(1.,.79,.48,halo);
         }`} />
     </mesh>
@@ -169,12 +171,13 @@ function Bolt({ at }: { at: V3 }) {
 function MachineLights({ motion }: { motion: ArcadeMotion }) {
   const group = useRef<THREE.Group>(null);
   useFrame(() => {
+    const cue = machineLightCue(motion.spotlight, motion.spinGlow, motion.stopGlow, motion.travel, motion.blackout);
     group.current?.children.forEach((g, i) => {
-      const value = (motion.lights[i] * .6 + spinLightLevel(motion.spinPhase, i / 4, motion.spinGlow, motion.stopGlow)) * (1 - motion.blackout);
+      const value = (.07 + motion.lights[i] * .6 + spinLightLevel(motion.spinPhase, i / 4, motion.spinGlow, motion.stopGlow)) * cue.visible;
       const material = (g.children[1] as THREE.Mesh<THREE.BoxGeometry, THREE.MeshStandardMaterial>).material;
       material.emissiveIntensity = .02 + value * 4;
       material.color.set(colors[i]).multiplyScalar(.15 + value * .8);
-      (g.children[2] as THREE.PointLight).intensity = value * 11;
+      (g.children[2] as THREE.PointLight).intensity = value * 14;
       (g.children[3] as THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>).material.uniforms.strength.value = value * .55;
     });
   });
@@ -196,6 +199,7 @@ function MachineLights({ motion }: { motion: ArcadeMotion }) {
 
 function SpinLightTrim({ motion }: { motion: ArcadeMotion }) {
   const lamps = useRef<THREE.Group>(null);
+  const halo = useRef<THREE.ShaderMaterial>(null);
   const tints = useMemo(() => colors.map(color => new THREE.Color(color)), []);
   const left = useRef<THREE.RectAreaLight>(null), right = useRef<THREE.RectAreaLight>(null);
   const positions = useMemo(() => [
@@ -205,17 +209,40 @@ function SpinLightTrim({ motion }: { motion: ArcadeMotion }) {
     ...Array.from({ length: 6 }, (_, i): V3 => [-2.94, 1.96 + i * .34, 1.58]),
   ], []);
   useFrame(() => {
-    const fade = (1 - motion.blackout) * (1 - motion.blast);
+    const cue = machineLightCue(motion.spotlight, motion.spinGlow, motion.stopGlow, motion.travel, motion.blackout);
+    const fade = 1 - motion.blast;
     lamps.current?.children.forEach((lamp, i) => {
-      const level = spinLightLevel(motion.spinPhase, i / positions.length, motion.spinGlow, motion.stopGlow) * fade;
+      const level = spinLightLevel(motion.spinPhase, i / positions.length, motion.spinGlow, motion.stopGlow) * cue.visible * fade;
       const material = (lamp.children[1] as THREE.Mesh<THREE.BoxGeometry, THREE.MeshPhysicalMaterial>).material;
-      material.emissiveIntensity = .025 + level * 3;
+      material.emissiveIntensity = cue.trim * fade + level * 3.8;
+      material.emissive.set("#ffd99a").lerp(tints[Math.floor(i / 8)], clamp01(level * 1.7));
       material.color.set("#e9cd91").lerp(tints[Math.floor(i / 8)], clamp01(level * 2));
     });
-    if (left.current) left.current.intensity = (motion.spinGlow * 5 + motion.stopGlow * 3) * fade;
-    if (right.current) right.current.intensity = (motion.spinGlow * 5 + motion.stopGlow * 3) * fade;
+    if (left.current) left.current.intensity = cue.rim * fade;
+    if (right.current) right.current.intensity = cue.rim * .85 * fade;
+    if (halo.current) {
+      halo.current.uniforms.strength.value = cue.halo * (1 - motion.blast);
+      halo.current.uniforms.phase.value = motion.spinPhase;
+      halo.current.uniforms.energy.value = motion.spinGlow;
+    }
   });
   return <group name="spin-light-trim">
+    <mesh position={[0, 2.84, 1.52]} name="cabinet-local-light-spill">
+      <planeGeometry args={[6.9, 3.3]} />
+      <shaderMaterial ref={halo} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false}
+        uniforms={{ strength: { value: 0 }, phase: { value: 0 }, energy: { value: 0 } }}
+        vertexShader={`varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`}
+        fragmentShader={`varying vec2 vUv;uniform float strength;uniform float phase;uniform float energy;
+          void main(){
+            vec2 p=(vUv-.5)*vec2(6.9,3.3),q=abs(p)-vec2(2.87,1.08);
+            float d=length(max(q,0.))+min(max(q.x,q.y),0.)-.065;
+            float glow=exp(-abs(d)*18.)*strength;
+            float sweep=.5+.5*cos(phase*6.28318+p.x*1.6+p.y*2.);
+            vec3 warm=vec3(1.,.77,.38),cool=vec3(.3,.66,1.);
+            vec3 tint=mix(warm,cool,smoothstep(-1.,2.,p.x)*energy*.6);
+            gl_FragColor=vec4(tint,glow*(1.+energy*sweep*.55));
+          }`} />
+    </mesh>
     <group name="recessed-lamp-channels">
       {[-2.94,2.94].map(x => <group key={x}>
         <InsetPanel at={[x,2.81,1.485]} width={.24} height={2.16} radius={.1} color="#29292c" />
@@ -237,8 +264,8 @@ function SpinLightTrim({ motion }: { motion: ArcadeMotion }) {
         </RoundedBox>
       </group>;
     })}</group>
-    <rectAreaLight ref={left} position={[-3.2, 3, 2.4]} rotation={[0, -.65, 0]} width={.7} height={3.2} color="#ff5578" intensity={0} />
-    <rectAreaLight ref={right} position={[3.2, 3, 2.4]} rotation={[0, .65, 0]} width={.7} height={3.2} color="#69b9ff" intensity={0} />
+    <rectAreaLight ref={left} position={[-3.2, 3, 2.4]} rotation={[0, -.65, 0]} width={.7} height={3.2} color="#ffc173" intensity={0} />
+    <rectAreaLight ref={right} position={[3.2, 3, 2.4]} rotation={[0, .65, 0]} width={.7} height={3.2} color="#9acfff" intensity={0} />
   </group>;
 }
 
@@ -576,61 +603,6 @@ function CardTable({ motion }: { motion: ArcadeMotion }) {
   </group>;
 }
 
-function CasinoArchitecture() {
-  const { size } = useThree();
-  return <group name="casino-salon">
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.42, -6]} receiveShadow name="polished-stone-floor">
-      <planeGeometry args={[38, 44]} />
-      <MeshReflectorMaterial resolution={size.width < 700 ? 256 : 512} mirror={.18} mixStrength={.4} color="#33282b" roughness={.48} metalness={.3} />
-    </mesh>
-    {/* A single low stone apron joins the central installation and both exhibit wings. */}
-    <Block at={[0, -.19, -1.1]} size={[16.5, .36, 10.6]} color="#4a3439" rough={.67} metal={.12} coat={.12} radius={.8} />
-    <Block at={[0, -.035, -1.11]} size={[16.4, .04, 10.5]} color="#917557" rough={.4} metal={.72} radius={.75} />
-    <Block at={[0, -.007, -1.11]} size={[16.24, .035, 10.35]} color="#392a30" rough={.65} metal={.08} coat={.18} radius={.7} />
-    <Block at={[0, -.18, 4.27]} size={[14.8, .3, .75]} color="#554043" rough={.72} metal={.12} radius={.2} />
-    <Block at={[0, -.31, 4.78]} size={[15.5, .18, .55]} color="#3b2b30" rough={.7} metal={.12} radius={.16} />
-    <Block at={[0, -.021, -1]} size={[7.9, .045, 6.25]} color="#480d26" rough={.98} metal={0} coat={0} sheen={.7} radius={.32} />
-    <Block at={[0, 3.7, -6.3]} size={[23, 8.4, .4]} color="#483438" metal={.05} rough={.96} coat={0} />
-    <InsetPanel at={[0, 3.3, -6.04]} width={9} height={6.5} radius={1.7} color="#917656" rim={.04} />
-    <InsetPanel at={[0, 3.3, -6.01]} width={8.87} height={6.37} radius={1.64} color="#2b1120" />
-    {[-1, 1].map(side => <group key={side} name="gallery-colonnade">
-      <Block at={[side * 8.65, 3.7, -1.5]} size={[.6, 7.4, 10]} color="#32282b" rough={.85} metal={.08} coat={0} />
-      {[-4.5, 1.1].map(z => <group key={z} position={[side * 8.1, 0, z]}>
-        <Block at={[0, 3.45, 0]} size={[.6, 6.9, .65]} color="#6b5653" metal={.15} rough={.6} radius={.12} />
-        {[-.19, -.095, 0, .095, .19].map(x => <Block key={x} at={[x, 3.45, .345]} size={[.025, 6.6, .02]} color="#33272c" rough={.8} radius={.006} />)}
-        <Block at={[0, .15, 0]} size={[.76, .3, .8]} color="#9b7e57" metal={.7} />
-        <Block at={[0, 6.85, 0]} size={[.8, .15, .85]} color="#ac906b" metal={.7} />
-      </group>)}
-      <rectAreaLight position={[side * 6, 5.2, -3]} rotation={[-.25, 0, 0]} width={2.5} height={2.5} color="#ffdcbb" intensity={.55} />
-    </group>)}
-    <group name="gallery-ceiling-cove" position={[0, 7.15, -1]}>
-      <Block at={[0, .2, 0]} size={[18, .3, 12]} color="#251a23" rough={.9} metal={.1} />
-      {[1, .976].map((factor, index) => <mesh key={factor} rotation={[Math.PI / 2, 0, 0]} scale={[7.7 * factor, 4.3 * factor, 1]}>
-        <torusGeometry args={[1, index ? .006 : .014, 8, 128]} /><meshStandardMaterial color={index ? "#b79a75" : "#79634e"} emissive="#ffd998" emissiveIntensity={index ? .35 : .02} metalness={.6} roughness={.4} />
-      </mesh>)}
-    </group>
-  </group>;
-}
-
-function GalleryNiche() {
-  return <group name="rounded-exhibit-alcove">
-    <InsetPanel at={[0, 2.8, -.9]} width={3.4} height={5.5} radius={1.5} color="#695341" />
-    <InsetPanel at={[0, 2.8, -.85]} width={3.3} height={5.4} radius={1.45} color="#291820" />
-    <InsetPanel at={[0, 2.8, -.83]} width={3.08} height={5.16} radius={1.35} color="#4d3a30" rim={.023} />
-    <Block at={[0, .1, -.08]} size={[3.55, .19, 2.3]} color="#6c5351" rough={.64} metal={.13} radius={.38} />
-    <Block at={[0, .205, -.08]} size={[3.45, .025, 2.22]} color="#b99b70" rough={.4} metal={.76} radius={.35} />
-  </group>;
-}
-
-function ExhibitPlinth({ height = 1.3, radius = .95 }: { height?: number; radius?: number }) {
-  return <group name="stone-and-brass-plinth">
-    <mesh position={[0, height / 2, 0]} castShadow receiveShadow><cylinderGeometry args={[radius * .9, radius * .94, height, 64]} /><meshPhysicalMaterial color="#6b5053" roughness={.6} metalness={.12} clearcoat={.15} /></mesh>
-    {[.065, height - .015].map(y => <mesh key={y} position={[0, y, 0]} castShadow receiveShadow><cylinderGeometry args={[radius, radius, .075, 64]} /><meshStandardMaterial color="#b89b71" metalness={.8} roughness={.32} /></mesh>)}
-    <mesh position={[0, height + .03, 0]} receiveShadow><cylinderGeometry args={[radius * .97, radius * .97, .04, 64]} /><meshPhysicalMaterial color="#c0ada0" roughness={.52} metalness={.08} /></mesh>
-    {Array.from({ length: 32 }, (_, i) => { const a = i * Math.PI / 16; return <mesh key={i} position={[Math.sin(a) * radius * .933, height * .48, Math.cos(a) * radius * .933]} rotation={[0, a, 0]}><boxGeometry args={[.013, height * .65, .016]} /><meshStandardMaterial color="#48383b" roughness={.8} /></mesh>; })}
-  </group>;
-}
-
 function GalleryPicture({ src }: { src: string }) {
   const texture = useTexture(import.meta.env.BASE_URL + src.replace(/^\//, ""));
   return <mesh position={[0, 3.12, -.395]}><planeGeometry args={[1.57, 2.79]} /><meshStandardMaterial map={texture} roughness={.85} metalness={0} envMapIntensity={.1} /></mesh>;
@@ -765,9 +737,9 @@ function MachineSpotlights({ motion }: { motion: ArcadeMotion }) {
       rotation: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, -1, 0), bottom.clone().sub(source).normalize()) };
   }), []);
   useFrame(() => {
-    const level = motion.spotlight * (1 - motion.travel) * (1 - motion.blackout);
-    spots.current?.children.forEach((light, i) => { (light as THREE.SpotLight).intensity = level * (i === 0 ? 160 : 95) * (1 + motion.spinGlow * .12); });
-    beams.current?.children.forEach(beam => { (beam as THREE.Mesh<THREE.CylinderGeometry, THREE.ShaderMaterial>).material.uniforms.strength.value = level * .065; });
+    const cue = machineLightCue(motion.spotlight, motion.spinGlow, motion.stopGlow, motion.travel, motion.blackout);
+    spots.current?.children.forEach((light, i) => { (light as THREE.SpotLight).intensity = i === 0 ? cue.key : cue.fill; });
+    beams.current?.children.forEach(beam => { (beam as THREE.Mesh<THREE.CylinderGeometry, THREE.ShaderMaterial>).material.uniforms.strength.value = cue.beam; });
   });
   return <group name="machine-stage-spotlights">
     <primitive object={target} />

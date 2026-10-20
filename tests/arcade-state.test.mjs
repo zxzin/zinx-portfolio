@@ -44,7 +44,7 @@ test("reveal waits for scene readiness and uses the shared cancellable motion cl
   assert.match(entrance, /phase === "revealing" && !reduced && !state.fallback/);
   const scene = await read("src/components/PortalScene.tsx");
   assert.match(scene, /name="machine-stage-spotlights"/);
-  assert.match(scene, /motion.spotlight \* \(1 - motion.travel\)/);
+  assert.match(scene, /machineLightCue\(motion.spotlight, motion.spinGlow, motion.stopGlow, motion.travel, motion.blackout\)/);
 });
 test("velvet gathers as a deforming 3D surface with smooth normals and a weighted hem", async () => {
   const cloth = await read("src/components/StageCurtain.tsx");
@@ -219,7 +219,7 @@ test("lever is the physical entry; lightbox and real stickers replace the consol
 test("scene-mounted settings and companion controls retain semantic inputs and touch targets", async () => {
   const [entrance, css, wall] = await Promise.all(["src/components/PortalEntrance.tsx", "src/components/arcade.css", "src/components/exhibition.css"].map(read));
   assert.match(entrance, /className="scene-control-rail" aria-label="展示设置"/);
-  assert.match(entrance, /aria-pressed=\{enabled\}/);
+  assert.match(entrance, /aria-pressed=\{desired\}/);
   assert.doesNotMatch(entrance, /toggleMotion|少动效|aria-pressed=\{reduced\}/);
   assert.match(entrance, /useReducedMotion\(\)/);
   assert.match(entrance, /className="rail-indicator" aria-hidden="true"/);
@@ -234,10 +234,11 @@ test("scene-mounted settings and companion controls retain semantic inputs and t
   assert.doesNotMatch(entrance, /yy-dance-pause|entrance-hud/);
 });
 
-test("music defaults off, unlocks on user gesture and stays outside entrance timeline dependencies", async () => {
+test("music defaults on, unlocks on user gesture and stays outside entrance timeline dependencies", async () => {
   const audio = await read("src/lib/useExhibitionAudio.ts");
   const controller = await read("src/lib/useArcade.ts");
-  assert.match(audio, /desired: false, playing: false, status: "muted"/);
+  assert.match(audio, /desired: true, playing: false, status: "waiting-for-gesture"/);
+  assert.match(audio, /music.status === "waiting-for-gesture" \? "待播放"/);
   assert.match(audio, /sessionStorage.setItem/);
   assert.match(audio, /"pointerdown", gesture, true/);
   assert.match(audio, /"keydown", gesture, true/);
@@ -248,13 +249,15 @@ test("music defaults off, unlocks on user gesture and stays outside entrance tim
 
 test("entrance uses a backlit sign and bounded shared casino lighting", async () => {
   const scene = await read("src/components/PortalScene.tsx");
+  const architecture = await read("src/components/GalleryArchitecture.tsx");
   assert.match(scene, /name="backlit-marquee"/);
   assert.match(scene, /background="transparent"/);
   assert.match(scene, /<rectAreaLight/);
   assert.match(scene, /name="marquee-edge-bloom"/);
-  assert.match(scene, /name="casino-salon"/);
-  assert.match(scene, /resolution=\{size.width < 700 \? 256 : 512\}/);
-  assert.match(scene, /sheen=\{\.7\}/);
+  assert.match(architecture, /name="casino-salon"/);
+  assert.match(architecture, /resolution=\{size.width < 700 \? 256 : 512\}/);
+  assert.match(architecture, /name="permanent-velvet-backdrop"/);
+  assert.match(architecture, /sheen=\{\.8\}/);
   assert.doesNotMatch(scene, /WorkshopArchitecture|function Plant/);
 });
 test("one shared scene smokes, bursts the machine and throws gold coins onto the table", async () => {

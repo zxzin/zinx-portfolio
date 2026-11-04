@@ -473,31 +473,6 @@ export const portfolioProjects: PortfolioProject[] = [
     selected: true,
   },
   {
-    slug: "vibetiming",
-    title: "VibeTiming",
-    cn: "代码等待小游戏",
-    kind: "GAME",
-    status: "PUBLIC",
-    note: "12 micro games",
-    copy: "12 个单输入像素小游戏，把 Agent 等待时间变成一小局。",
-    evidence: "WEB · CODEX PLUGIN · OPEN SOURCE",
-    accent: "green",
-    tags: ["WEB", "ARCADE", "PLUGIN", "OPEN SOURCE"],
-    media: {
-      kind: "image",
-      src: "/projects/vibetiming.png",
-      alt: "VibeTiming 像素小游戏",
-    },
-    links: [
-      {
-        label: "OPEN REPO",
-        href: "https://github.com/zxzin/vibe-timing",
-        external: true,
-      },
-    ],
-    selected: true,
-  },
-  {
     slug: "terms-of-surrender",
     title: "Terms of Surrender",
     cn: "权限投降书",

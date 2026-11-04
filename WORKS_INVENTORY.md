@@ -23,7 +23,7 @@
 
 2026-10-09：VideoPro 独立展项设为隐藏，原目录与车内办公素材保留。新增影片的用户确认原话、来源哈希及平台状态记录在 `content-sources/approved-films.json`。YY 表情舞台、猫猫裁决官宣传片的当前版本仍待确认，暂不加入。此次只更新本地作品集。
 
-本轮明确排除 VibeTiming、蓝鼠线下互动工具、HomeGuard。用户确认加入新版大卫 VJ、烟嘴空气动力学、录屏小子新 UI 与 YY 表情素材。所有新增内容停留在本地，未执行 Git 提交、推送或发布。
+本轮明确排除蓝鼠线下互动工具、HomeGuard。用户确认加入新版大卫 VJ、烟嘴空气动力学、录屏小子新 UI 与 YY 表情素材。所有新增内容停留在本地，未执行 Git 提交、推送或发布。
 
 ## 有图片，暂存候选
 
@@ -32,7 +32,6 @@
 | `shushucity` | 数数城，视频创作与直播伪装器 | `public/cases/shushucity-stage.png`、`shushucity-home.png`、`shushucity-export.png`；`public/brand/shushu-icon.png` | 2026-09-23 暂停展出：产品与相关素材待完善。资料保留，完善后重新确认再开启 `visible`。展台、详情入口和开场贴纸均随可见名单更新。 |
 | `videopro` | AI 视频制作 Skill | `public/systems/videopro-car-office-loop.mp4`、`videopro-car-office-poster.png`、`videopro-car-office-contact.png` | 2026-10-09 按用户要求撤下独立 Skill 展项；原资料保留，展厅以验收确认的具体视频作品呈现。 |
 | `zinxbee` | 用量小蜜蜂 | `public/evidence/zinxbee-real.jpg` | 可加入工具区；当前压缩工具数量，避免分散重点。 |
-| `vibetiming` | 等待代码时玩的像素小游戏 | `public/projects/vibetiming.png` | 2026-10-03 用户明确排除；历史素材保留，可见名单不启用。 |
 | `terms-of-surrender` | 权限投降书游戏原型 | `public/projects/terms.png` | 适合游戏交互片段；正式展出前复核当前可运行版本与体验链接。 |
 | `zinxpromo` | 营销工作记忆系统 | `public/projects/zinxpromo.png` | 已有界面；补具体输入、操作与最终产出后再策展。 |
 | `runpro` | 复杂任务整理与交付 Skill | `public/systems/runpro-cover.png` | 现有封面不足以说明交付质量；应补经授权的具体成果页、前后对照或演示，客户与课程私有资料保持私有。 |

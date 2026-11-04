@@ -1,7 +1,7 @@
 {
   "checkedAt": "2026-10-03",
   "scope": "Local portfolio additions; no deployment or external publication performed.",
-  "excluded": ["VibeTiming", "蓝鼠线下互动工具", "HomeGuard"],
+  "excluded": ["蓝鼠线下互动工具", "HomeGuard"],
   "works": [
     {
       "id": "moon-cat",
